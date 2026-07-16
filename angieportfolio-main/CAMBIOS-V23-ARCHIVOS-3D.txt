@@ -1,0 +1,32 @@
+CAMBIOS V23 — ARCHIVOS 3D
+
+1. Se integraron físicamente dentro de frontend/public/assets/3d:
+   - frog
+   - female
+   - male
+
+2. Los MPG se convirtieron a MP4 H.264, 30 FPS, yuv420p y fast start para
+   compatibilidad con Chrome, Edge, Firefox, Safari y dispositivos móviles.
+
+3. Optimización de videos para web:
+   - Rana: 1280 × 960, 18 s, aproximadamente 1.1 MB.
+   - Femenino High Poly: 1280 × 960, 16 s, aproximadamente 0.6 MB.
+   - Masculino High Poly: 1280 × 960, 16 s, aproximadamente 0.6 MB.
+   - Masculino Low Poly: 1080 × 1350, 15 s, aproximadamente 2.6 MB.
+
+4. Los videos horizontales se centran dentro de la tarjeta 4:5. El recorte de
+   la tarjeta afecta únicamente el encuadre visual; el archivo completo se
+   conserva y se muestra sin recorte en el lightbox.
+
+5. Orden del carrusel masculino:
+   - HIGH POLY
+   - LOW POLY
+   - mas1.jpg
+   - mas2.jpg
+   - mas3.jpg
+   - mas4.jpg
+
+6. El carrusel espera a que termine cada video antes de avanzar al siguiente
+   elemento. Las imágenes avanzan automáticamente según el tiempo configurado.
+
+7. La compilación de producción terminó correctamente.

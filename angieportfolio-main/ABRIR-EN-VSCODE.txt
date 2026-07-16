@@ -1,0 +1,35 @@
+ABRIR EL PORTAFOLIO EN VISUAL STUDIO CODE — V23
+
+1. Extrae el ZIP completo.
+2. Abre la carpeta angieportfolio-main en Visual Studio Code.
+3. Abre Terminal > New Terminal.
+4. Entra a frontend:
+
+   cd frontend
+
+5. La primera vez:
+
+   npm install
+
+6. Para editar y ver cambios en vivo:
+
+   npm start
+
+   Abre: http://localhost:3000
+
+7. Para detener el servidor de desarrollo:
+
+   Ctrl + C
+
+   Si pregunta Terminate batch job (Y/N), escribe Y.
+
+8. Para revisar la versión ligera de producción:
+
+   npm run preview
+
+   Abre: http://localhost:4173
+
+La carpeta build ya está incluida. Si modificas el código:
+
+   npm run build
+   npm run preview

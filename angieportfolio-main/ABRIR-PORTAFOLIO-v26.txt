@@ -1,0 +1,12 @@
+1. Abre esta carpeta en Visual Studio Code.
+2. Abre una terminal en la carpeta frontend.
+3. Primera vez:
+   npm install --legacy-peer-deps
+4. Para editar:
+   npm start
+5. Para compilar:
+   npm run build
+6. Para revisar el comportamiento publicado:
+   npm run preview
+   Abre http://localhost:4173
+7. Al terminar, detén el servidor con Ctrl + C.

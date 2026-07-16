@@ -1,0 +1,7 @@
+/* App-level overrides — most styles live in index.css */
+.App {
+    min-height: 100vh;
+    background: var(--site-bg);
+    color: var(--site-fg);
+    transition: background-color 450ms ease, color 450ms ease;
+}

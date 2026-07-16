@@ -1,0 +1,32 @@
+PORTAFOLIO ANGÉLICA JIMÉNEZ — V25
+
+La primera vez:
+1. Abre la carpeta angieportfolio-main en Visual Studio Code.
+2. Abre una terminal en Command Prompt / Símbolo del sistema.
+3. Ejecuta:
+
+   cd frontend
+   npm install --legacy-peer-deps
+
+Para editar o revisar en desarrollo:
+
+   npm start
+
+Abre: http://localhost:3000
+
+Para revisarlo como un enlace publicado (recomendado):
+
+   npm run preview
+
+Abre: http://localhost:4173
+
+Para detener cualquier servidor:
+
+   Ctrl + C
+
+Si pregunta "Terminate batch job (Y/N)?", escribe Y.
+
+IMPORTANTE:
+- No dejes npm start abierto cuando termines; consume más memoria por ser un servidor de desarrollo.
+- La carpeta frontend/build está compilada y lista para publicación.
+- Todos los archivos usados por la página están integrados dentro del proyecto.

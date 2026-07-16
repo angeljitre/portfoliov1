@@ -1,0 +1,19 @@
+PORTAFOLIO ANGÉLICA JIMÉNEZ — V23
+
+Base: v22 estable para producción.
+Actualización: integración de archivos 3D reales de Frog, Female y Male.
+
+Masculino:
+- Turn A (MPG original) convertido e integrado como HIGH POLY.
+- Turn (MP4 original) optimizado e integrado como LOW POLY.
+- Cuatro imágenes locales conservadas.
+
+Femenino:
+- Un solo video integrado como HIGH POLY.
+- Cuatro imágenes locales conservadas.
+
+Rana:
+- Turnaround y cuatro imágenes locales actualizados.
+
+La estructura del carrusel ya acepta más de un video con etiquetas individuales;
+se utilizará más adelante para HIGH POLY y LOW POLY del personaje cartoon.

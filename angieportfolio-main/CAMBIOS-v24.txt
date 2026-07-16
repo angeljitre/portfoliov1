@@ -1,0 +1,30 @@
+PORTAFOLIO V24 — DISEÑO INTEGRADO Y VIDEO PULIDO
+
+Cambios:
+- Se integraron 14 piezas reales seleccionadas de Diseño.zip.
+- Todas las piezas de diseño se convirtieron a WebP para web, conservando su composición completa.
+- La galería usa un flujo masonry que respeta orientación y proporción; no fuerza banners ni recortes.
+- El lightbox muestra cada pieza centrada y completa.
+- El video femenino High Poly y el masculino High Poly se ampliaron dentro de su tarjeta manteniendo el centro.
+- Se precargan los videos del carrusel cuando la sección se acerca a la pantalla para reducir tirones.
+- El póster permanece visible hasta que el video tenga un cuadro listo, evitando destellos transparentes.
+- Las tarjetas del stack conservan más opacidad durante los cambios para que la transición sea natural.
+- Se recuperó mayor presencia de los glows en dark y light mode sin volver a los blurs gigantes anteriores.
+- La compilación de producción terminó correctamente.
+
+ABRIR PARA EDITAR
+1. Abrir angieportfolio-main en Visual Studio Code.
+2. Terminal:
+   cd frontend
+   npm install
+   npm start
+3. Abrir http://localhost:3000
+4. Al terminar, Ctrl+C y confirmar con Y.
+
+PROBAR COMO ENLACE PUBLICADO
+1. Terminal dentro de frontend:
+   npm run preview
+2. Abrir http://localhost:4173
+3. Para detener: Ctrl+C.
+
+La carpeta frontend/build ya está incluida y corresponde a esta versión.

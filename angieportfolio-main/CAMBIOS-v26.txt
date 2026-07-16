@@ -1,0 +1,31 @@
+PORTAFOLIO v26 — CORRECCIONES POR APARTADOS
+
+HERO
+- Acceso directo por correo junto a Behance y LinkedIn.
+- Nota discreta con flecha para identificar a Tavvi como modelo 3D propio inspirado en la mascota de Angélica.
+
+3D / VIDEO
+- Todos los videos locales fueron recodificados a H.264 Main, YUV420p, 30 FPS constantes, GOP de 2 segundos y faststart.
+- Se eliminan B-frames para mejorar la estabilidad de decodificación en tarjetas transformadas.
+- El aro de progreso ahora sigue cuadros realmente presentados por el navegador.
+- Recuperación automática si el tiempo avanza pero el navegador deja de pintar cuadros.
+- Las imágenes y posters que no llenan 4:5 usan una extensión desenfocada de la misma pieza, sin recortar el contenido principal.
+
+DISEÑO VISUAL
+- Galería a color desde el inicio.
+- Collage irregular tipo masonry, pero contenido dentro de un rectángulo cerrado sin celdas vacías.
+- Banners separados y todas las piezas conservan su composición mediante fondo adaptativo.
+
+PROYECTOS
+- Todas las portadas, tarjetas, variaciones y videos se muestran a color.
+- Botón de Publicación oficial en Navituxtla y UNACH con los enlaces proporcionados.
+- Ch'ulel: flipbook ligero con portada, 12 spreads dobles divididos en páginas izquierda/derecha y contraportada; animación 3D de paso de hoja.
+- Ch'ulel: la presentación ocupa una tarjeta ancha completa para no chocar con identidad y marketing.
+- Bashequen: bloque editorial de Teaser con texto a la izquierda, video a la derecha, colaboración con Cántaro Azul y etiqueta de preproducción.
+- Navituxtla: orden Catedral / Video / Invitación, con el video en la tarjeta central.
+- UNACH: tres variaciones centradas como tarjetas independientes; se identifica la versión final seleccionada.
+
+RENDIMIENTO
+- Artbook integrado únicamente como WebP web; el PDF completo no está incluido.
+- Se cargan por adelantado solo las páginas vecinas del flipbook.
+- Los videos se adjuntan cuando están cerca del viewport y se pausan fuera de pantalla.

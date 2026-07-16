@@ -1,0 +1,5 @@
+Versión: v26
+Base: v25 proyectos + flipbook + galería
+Fecha: 15 de julio de 2026
+Estado: build de producción compilado correctamente.
+Pendiente de archivos: personaje cartoon.

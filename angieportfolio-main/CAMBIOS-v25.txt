@@ -1,0 +1,12 @@
+V25 — PROYECTOS, FLIPBOOK Y GALERÍA CERRADA
+
+- Ch'ulel: portada, identidad, marketing, presentación y vista previa ligera del artbook.
+- Artbook: portada y contraportada separadas desde el archivo doble; 12 spreads del PDF convertidos a WebP. El PDF original no está incluido.
+- Bashequen: portada, tarjeta de modelo 3D, tarjeta de póster y bloque de video titulado Teaser.
+- Navituxtla: portada y tres tarjetas en orden Catedral / Video / Invitación.
+- UNACH: portada mejorada y tres variaciones completas.
+- Diseño: galería cerrada por bandas, sin huecos grandes, con tres banners nuevos integrados.
+- Videos 3D: reproducción más estable y transición del stack menos transparente.
+- Female y Male High Poly: escala visual aumentada.
+- Light mode: glows/globos más visibles sin dominar el contenido.
+- Build de producción compilado correctamente y servidor preview probado con soporte de rangos para MP4.

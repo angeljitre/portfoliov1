@@ -1,0 +1,68 @@
+PORTAFOLIO v27 — CORRECCIONES POR APARTADOS (a partir de v26)
+
+IMPORTANTE
+- No pude compilar ni previsualizar en este entorno (sin acceso a internet
+  para instalar dependencias), así que estos cambios están hechos con
+  revisión cuidadosa del código pero SIN verificación visual directa.
+  Corre "npm install" y "npm start" en tu máquina y revisa cada apartado;
+  si algo necesita un ajuste fino de posición/tamaño, dímelo con capturas
+  y lo afino.
+- La carpeta frontend/build de v26 se eliminó de este paquete porque ya no
+  corresponde al código nuevo. Genera una build actualizada con
+  "npm run build" dentro de frontend/ antes de publicar el enlace.
+
+HERO
+- La nota de autoría de Tavvi se movió del centro de la composición al
+  espacio vacío del lado derecho (arriba, lejos del nombre y del texto de
+  "focus on"), y se redujo de tamaño (~18% más pequeña en escritorio,
+  aún más compacta en móvil). Archivo: src/index.css (.hero-model-note).
+  Puede necesitar un ajuste fino de posición una vez la veas en vivo,
+  sobre todo la curva de la flecha, ya que no pude confirmar visualmente
+  dónde cae exactamente el modelo 3D en cada resolución.
+
+SECCIÓN 3D
+- Encontré la causa real de las "barras negras": una regla CSS
+  (.media-glass img/video { background: var(--media-bg) }) pintaba un
+  fondo casi negro justo en las zonas vacías cuando una imagen o video
+  usaba object-fit: contain, tapando el fondo desenfocado "elegante" que
+  ya existía debajo. Se corrigió quitando ese fondo solo en las capas de
+  primer plano que ya tienen su propio fondo extendido
+  (adaptive-media-frame__content, stack-carousel__media, smart-video
+  video). Esto resuelve las barras negras en 3D, Diseño Visual y
+  Proyectos a la vez.
+- Además, el carrusel de tarjetas de la sección 3D (StackCarousel) volvió
+  a recortar para llenar la tarjeta (object-fit: cover) en vez de
+  "contain", que es el encuadre que tenían las versiones anteriores
+  (v23). Si alguna pieza puntual necesita mostrarse completa sin recorte,
+  se puede marcar individualmente con cardFit: "contain" en
+  siteContent.js.
+- Video congelado: se reforzó el watchdog de recuperación (detecta el
+  congelamiento más rápido) y, más importante, se promovió el <video> a
+  su propia capa de composición (transform: translateZ(0)) para evitar
+  que Chrome deje de repintarlo cuando la tarjeta que lo contiene se
+  anima con transform. Archivos: SmartVideo.jsx, index.css.
+
+DISEÑO VISUAL
+- Se rehizo manualmente la composición del collage: cada una de las 17
+  piezas ahora tiene un tamaño de celda elegido a partir de sus
+  dimensiones reales (banners horizontales anchos y bajos, invitaciones y
+  carteles verticales altos y angostos, el mockup de tote cuadrado),
+  en vez del patrón genérico anterior que no correspondía a la
+  orientación real de cada imagen. Archivo: DesignGallery.jsx
+  (COLLAGE_LAYOUT).
+- Revisé la carpeta frontend/public/assets/design: las 17 imágenes que
+  hay ahí ya están todas integradas en la galería (no encontré piezas
+  adicionales sueltas). Si tienes más publicaciones para agregar, mándamelas
+  y las integro con el mismo criterio de orientación real.
+
+PROYECTOS
+- Las barras negras se eliminan con la misma corrección de fondo de la
+  sección 3D (arriba), aplicada también a las tarjetas de imagen/video de
+  Proyectos (Navituxtla, UNACH, Bashequen, Ch'ulel, etc.).
+- Publicación oficial: se reemplazó el botón tipo píldora por un
+  componente editorial nuevo — una pequeña etiqueta "PRESS" rotada, el
+  texto del enlace con una línea subrayada animada, y un ícono circular
+  que gira a flecha en hover. Archivos: SpecialProjects.jsx (bloque
+  official-post), index.css (.official-post*). Se usa en Navituxtla y
+  UNACH, que son los que tienen officialPost configurado en
+  siteContent.js.
