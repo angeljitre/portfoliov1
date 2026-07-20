@@ -7,7 +7,7 @@ import {
   useSpring,
   useInView,
 } from "framer-motion";
-import { Plus, X, ArrowUpRight, ChevronLeft, ChevronRight, BookOpen, ExternalLink } from "lucide-react";
+import { Plus, X, ArrowUpRight, ChevronLeft, ChevronRight, BookOpen, ExternalLink, Play } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import { useTheme } from "../hooks/useTheme";
 import { getProjectLogo, getSoftwareLogo } from "../lib/logoAssets";
@@ -156,28 +156,31 @@ function MagneticTitle({ children }) {
   );
 }
 
-function AdaptiveImage({ src, alt = "", className = "", contentClassName = "", priority = false }) {
+// Flush: the media fills its container edge-to-edge with no blurred
+// backdrop layer and no padding — used wherever the outer card is sized to
+// the asset's own real aspect-ratio (set inline per item at the call
+// site), so there's never a gap left to fill.
+function FlushImage({ src, alt = "", className = "", priority = false }) {
   return (
-    <div className={`adaptive-media-frame ${className}`}>
-      <img
-        src={src}
-        alt=""
-        aria-hidden="true"
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        className="adaptive-media-frame__backdrop"
-      />
-      <img
-        src={src}
-        alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        fetchPriority={priority ? "high" : "low"}
-        className={`adaptive-media-frame__content ${contentClassName}`}
-      />
-    </div>
+    <img
+      src={src}
+      alt={alt}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+      fetchPriority={priority ? "high" : "low"}
+      className={`h-full w-full object-contain ${className}`}
+    />
   );
 }
+
+// Reference card shape for every project's supporting gallery — taken
+// from the UNACH variations (the approved reference). Every gallery card
+// across every project uses this same fixed box so the grid presents
+// consistently from one project to the next; each image/video still
+// fits inside via object-fit:contain (FlushImage/SmartVideo flush), so a
+// piece whose own ratio doesn't match exactly is never cropped or
+// stretched — it just doesn't touch every edge of its card.
+const GALLERY_CARD_RATIO = "1372 / 2000";
 
 // UNACH variations remain separate cards, centered as a single group.
 function VariationsGallery({ variations, projectId }) {
@@ -199,32 +202,32 @@ function VariationsGallery({ variations, projectId }) {
 
   return (
     <>
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-3 md:gap-6">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-5 sm:grid-cols-3 md:gap-6">
         {variations.map((variation, index) => (
           <motion.div key={variation.id} variants={ITEM_VARIANTS} className="deferred-paint-item min-w-0">
             <button
               type="button"
               data-testid={`${projectId}-variation-${index}`}
               onClick={() => setOpenId(variation.id)}
-              className="media-glass group relative block aspect-[3/4] w-full overflow-hidden border border-white/10"
+              className="media-glass group relative block w-full overflow-hidden border border-white/10"
+              style={{ aspectRatio: `${variation.w} / ${variation.h}` }}
               aria-label={`${ui.openVariation} ${index + 1}`}
             >
-              <AdaptiveImage
+              <FlushImage
                 src={variation.image}
                 alt={variation.label || ""}
-                className="absolute inset-0"
-                contentClassName="transition-transform duration-700 ease-out group-hover:scale-[1.025]"
+                className="transition-transform duration-700 ease-out group-hover:scale-[1.025]"
               />
               <div className="pointer-events-none absolute inset-0 halftone opacity-[0.09] mix-blend-overlay" />
               <span className="media-icon-chip absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full transition-all duration-300 group-hover:scale-105">
                 <ArrowUpRight size={12} />
               </span>
-              <span className="media-label-chip bottom-2 left-2">
-                {variation.final ? variation.label : `0${index + 1}`}
-              </span>
             </button>
-            {!variation.final && variation.label && (
-              <p className="mt-3 text-center font-mono-label text-[10px] text-white/48">{variation.label}</p>
+            {variation.label && (
+              <h4 className="mt-4 font-heading text-lg uppercase tracking-tight text-white">{variation.label}</h4>
+            )}
+            {variation.text && (
+              <p className="mt-2 font-body text-sm leading-relaxed text-white/60">{variation.text}</p>
             )}
           </motion.div>
         ))}
@@ -264,6 +267,177 @@ function VariationsGallery({ variations, projectId }) {
                 >
                   <img src={openItem.image} alt={openItem.label || ""} decoding="async" className="media-lightbox__image" />
                 </motion.div>
+              </motion.div>
+            </AnimatePresence>,
+            document.body,
+          )
+        : null}
+    </>
+  );
+}
+
+// Supporting project gallery (image/video mix). Every project shares the
+// same grid/card footprint and click-to-enlarge interaction. `fixedRatio`
+// (Navituxtla) uses one reference box shape for every card, same as
+// VariationsGallery. With `fixedRatio={false}` (Ch'ulel, Bashequen) each
+// card's placeholder instead takes that item's own real aspect ratio, so
+// a vertical piece gets a vertical placeholder and a horizontal piece
+// gets a horizontal one — never a mismatched box with empty letterboxing.
+function ProjectGallery({ items, projectId, ui, fixedRatio = true, showTagChip = true }) {
+  const [openId, setOpenId] = useState(null);
+  const openItem = items.find((g) => g.id === openId);
+
+  useEffect(() => {
+    if (!openId) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event) => event.key === "Escape" && setOpenId(null);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [openId]);
+
+  // A row of 3 cards at their own max-width (448px each) adds up to more
+  // than the max-w-5xl container, so 3-item rows still use the proven
+  // equal-fraction grid (each 1fr track force-shrinks its card to fit,
+  // which is why e.g. Ch'ulel's cards render around 328px rather than
+  // their 448px cap). Content-sized columns only kick in for a row short
+  // enough to actually fit at each card's own width without shrinking
+  // (currently just Bashequen's 2 cards) — there, equal tracks would
+  // instead center the narrower poster inside a too-wide track of its
+  // own, throwing the pair's group-centering off (25px/88px margins).
+  const cols = Math.min(items.length, 3);
+  const fitsAtOwnWidth = items.length < 3;
+  const SM_COLS_CLASS = { 1: "sm:grid-cols-1", 2: "sm:grid-cols-2", 3: "sm:grid-cols-3" };
+
+  return (
+    <>
+      <div
+        className={`mx-auto grid max-w-5xl grid-cols-1 items-center justify-center gap-5 md:gap-6 ${
+          fitsAtOwnWidth ? "project-gallery-grid" : SM_COLS_CLASS[cols] || "sm:grid-cols-3"
+        }`}
+        style={fitsAtOwnWidth ? { "--gallery-cols": cols } : undefined}
+      >
+        {items.map((g, gi) => {
+          // The width cap lives on this outer wrapper (not just the card)
+          // so the caption text below it wraps to the same width instead
+          // of stretching the flex item to its own unconstrained line
+          // length, which would throw off the group's centering.
+          const widthClass = fixedRatio ? "" : g.standardSize ? "mx-auto max-w-xs" : "mx-auto max-w-md";
+          return (
+          <motion.div key={g.id} variants={ITEM_VARIANTS} className={`deferred-paint-item min-w-0 ${widthClass}`}>
+            <div className={`special-image-float special-image-float--${(gi % 3) + 1}`}>
+              <div
+                role="button"
+                tabIndex={0}
+                data-testid={`${projectId}-gallery-${gi}`}
+                onClick={() => setOpenId(g.id)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  setOpenId(g.id);
+                }}
+                className="media-glass group relative block w-full cursor-pointer overflow-hidden border border-white/10"
+                style={{ aspectRatio: fixedRatio ? GALLERY_CARD_RATIO : `${g.w} / ${g.h}` }}
+                aria-label={`${ui.openImage} ${gi + 1}`}
+              >
+                {g.type === "video" ? (
+                  <SmartVideo
+                    src={g.src}
+                    poster={g.poster}
+                    autoPlay
+                    loop
+                    flush
+                    className="absolute inset-0 h-full w-full"
+                    videoClassName="h-full w-full"
+                    videoStyle={{ objectFit: "contain" }}
+                    controlLabel={ui.playPauseVideo || "Reproducir o pausar video"}
+                  />
+                ) : (
+                  <FlushImage
+                    src={g.image}
+                    alt={g.title || ""}
+                    className="transition-transform duration-700 hover:scale-[1.025]"
+                    priority
+                  />
+                )}
+                <div className="pointer-events-none absolute inset-0 halftone opacity-[0.09] mix-blend-overlay" />
+                <span className="media-icon-chip absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full transition-all duration-300 group-hover:scale-105">
+                  {g.type === "video" ? <Play size={12} fill="currentColor" /> : <ArrowUpRight size={12} />}
+                </span>
+                {showTagChip && (
+                  <span className="media-label-chip bottom-2 left-2">0{gi + 1} · {g.title}</span>
+                )}
+              </div>
+            </div>
+            {g.text && (
+              <>
+                <h4 className="mt-4 font-heading text-lg uppercase tracking-tight text-white">{g.title}</h4>
+                <p className="mt-2 font-body text-sm leading-relaxed text-white/60">{g.text}</p>
+              </>
+            )}
+          </motion.div>
+          );
+        })}
+      </div>
+
+      {typeof document !== "undefined" && openId && openItem
+        ? createPortal(
+            <AnimatePresence>
+              <motion.div
+                data-testid={`${projectId}-gallery-lightbox`}
+                role="dialog"
+                aria-modal="true"
+                className="media-lightbox"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onClick={() => setOpenId(null)}
+              >
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setOpenId(null);
+                  }}
+                  aria-label={ui.close}
+                  className="media-lightbox__close"
+                >
+                  <X size={16} />
+                </button>
+                {openItem.type === "video" ? (
+                  <motion.div
+                    className="media-lightbox__content media-glass"
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <SmartVideo
+                      src={openItem.src}
+                      poster={openItem.poster}
+                      active={!!openId}
+                      autoPlay
+                      loop
+                      className="media-lightbox__video-wrap"
+                      videoClassName="media-lightbox__video"
+                      controlLabel={ui.playPauseVideo || "Reproducir o pausar video"}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    className="media-lightbox__content media-lightbox__content--image"
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <img src={openItem.image} alt={openItem.title || ""} decoding="async" className="media-lightbox__image" />
+                  </motion.div>
+                )}
               </motion.div>
             </AnimatePresence>,
             document.body,
@@ -378,14 +552,14 @@ function ArtbookPreview({ config, projectId }) {
           <button
             type="button"
             onClick={() => { setIndex(0); setTurn(null); setOpen(true); }}
-            className="media-glass group relative overflow-hidden border border-white/10 text-left"
+            className="media-glass group relative w-full overflow-hidden border border-white/10 text-left"
+            style={{ aspectRatio: `${config.coverW} / ${config.coverH}` }}
             aria-label={config.title}
           >
-            <AdaptiveImage
+            <FlushImage
               src={config.cover}
               alt={config.title}
-              className="aspect-[3/2] w-full"
-              contentClassName="transition-transform duration-700 group-hover:scale-[1.015]"
+              className="transition-transform duration-700 group-hover:scale-[1.015]"
             />
             <div className="pointer-events-none absolute inset-0 halftone opacity-[0.08] mix-blend-overlay" />
             <span className="media-icon-chip absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full">
@@ -494,7 +668,7 @@ function ExpandableCard({ p, i }) {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-15%" }}
-        className="relative z-10 grid grid-cols-12 gap-6 md:gap-10"
+        className="relative z-10 grid grid-cols-12 items-center gap-6 md:gap-10"
       >
         <motion.div
           variants={ITEM_VARIANTS}
@@ -572,16 +746,16 @@ function ExpandableCard({ p, i }) {
 
         <motion.div
           variants={ITEM_VARIANTS}
-          className="col-span-12 md:col-span-7 lg:col-span-8"
+          className="col-span-12 min-w-0 md:col-span-6 lg:col-span-7"
         >
           <div
-            className={`media-glass special-image-float special-image-float--${(i % 3) + 1} relative aspect-[16/11] w-full overflow-hidden border border-white/10`}
+            className={`media-glass special-image-float special-image-float--${(i % 3) + 1} relative mx-auto w-full max-w-2xl overflow-hidden border border-white/10`}
+            style={{ aspectRatio: `${p.imageW} / ${p.imageH}` }}
           >
-            <AdaptiveImage
+            <FlushImage
               src={p.image}
               alt={p.title}
-              className="absolute inset-0"
-              contentClassName="transition-transform duration-1000 ease-out hover:scale-[1.025]"
+              className="transition-transform duration-1000 ease-out hover:scale-[1.025]"
             />
             <div className="pointer-events-none absolute inset-0 halftone opacity-[0.09] mix-blend-overlay" />
             <div className="absolute left-4 top-4 font-mono-label text-[10px] text-white/70">
@@ -680,43 +854,11 @@ function ExpandableCard({ p, i }) {
                 </motion.div>
               </div>
 
-              {/* Project media cards */}
+              {/* Project media cards — same fixed card shape and
+                  click-to-enlarge interaction as the UNACH variations. */}
               {p.imageBlocks && (
-                <motion.div
-                  variants={CONTAINER_VARIANTS}
-                  className={`mt-14 grid grid-cols-1 gap-6 md:gap-8 ${p.imageBlocks.length === 2 || p.imageBlocks.some((block) => block.wideMedia) ? "md:grid-cols-2" : "md:grid-cols-3"}`}
-                >
-                  {p.imageBlocks.map((b, bi) => (
-                    <motion.div key={b.id} variants={ITEM_VARIANTS} className={`deferred-paint-item ${b.wideMedia ? "md:col-span-2" : ""}`}>
-                      <div className={`special-image-float special-image-float--${(bi % 3) + 1}`}>
-                        <div className={`media-glass group relative w-full overflow-hidden border border-white/10 transition-all duration-700 hover:border-white/30 ${b.wideMedia ? "aspect-[16/7]" : "aspect-[4/5]"}`}>
-                          {b.type === "video" ? (
-                            <SmartVideo
-                              src={b.src}
-                              poster={b.poster}
-                              autoPlay
-                              loop
-                              className="absolute inset-0 h-full w-full"
-                              videoClassName="h-full w-full"
-                              videoStyle={{ objectFit: b.mediaFit || "cover", objectPosition: "center" }}
-                              controlLabel={ui.playPauseVideo || "Reproducir o pausar video"}
-                            />
-                          ) : (
-                            <AdaptiveImage
-                              src={b.image}
-                              alt={b.title}
-                              className="absolute inset-0"
-                              contentClassName="transition-transform duration-1000 ease-out group-hover:scale-[1.025]"
-                            />
-                          )}
-                          <div className="pointer-events-none absolute inset-0 halftone opacity-[0.09] mix-blend-overlay" />
-                          <div className="media-label-chip left-3 top-3">0{bi + 1}</div>
-                        </div>
-                      </div>
-                      <h4 className="mt-4 font-heading text-lg uppercase tracking-tight text-white">{b.title}</h4>
-                      <p className="mt-2 font-body text-sm leading-relaxed text-white/60">{b.text}</p>
-                    </motion.div>
-                  ))}
+                <motion.div variants={CONTAINER_VARIANTS} className="mt-14">
+                  <ProjectGallery items={p.imageBlocks} projectId={p.id} ui={ui} fixedRatio={false} showTagChip={p.id === "bashequen"} />
                 </motion.div>
               )}
 
@@ -726,21 +868,27 @@ function ExpandableCard({ p, i }) {
                   <div className="grid items-center gap-8 md:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)] md:gap-12">
                     <div>
                       <span className="font-mono-label text-[10px] text-white/45">{p.teaserVideo.eyebrow}</span>
-                      <h4 className="mt-4 font-heading text-3xl uppercase tracking-tight text-white md:text-5xl">{p.teaserVideo.title}</h4>
+                      <h4 className="mt-4 font-heading text-[clamp(2rem,4.4vw,4rem)] font-black uppercase leading-[0.95] tracking-tight text-white">{p.teaserVideo.title}</h4>
                       <p className="mt-5 max-w-xl font-body text-sm leading-relaxed text-white/70 md:text-base">{p.teaserVideo.description}</p>
                       <p className="mt-4 max-w-xl font-body text-sm leading-relaxed text-white/55">{p.teaserVideo.collaboration}</p>
-                      <span className="mt-6 inline-flex rounded-full border border-white/20 bg-white/[0.04] px-4 py-2 font-mono-label text-[10px] leading-relaxed text-white/78">
+                      <p className="mx-auto mt-6 max-w-sm text-center font-body text-xs italic leading-relaxed text-white/50">
                         {p.teaserVideo.status}
-                      </span>
+                      </p>
                     </div>
-                    <div data-testid={`special-project-${p.id}-video`} className="media-glass relative aspect-video w-full overflow-hidden border border-white/10">
+                    <div
+                      data-testid={`special-project-${p.id}-video`}
+                      className="media-glass relative w-full overflow-hidden border border-white/10"
+                      style={{ aspectRatio: `${p.teaserVideo.w} / ${p.teaserVideo.h}` }}
+                    >
                       <SmartVideo
                         src={p.teaserVideo.src}
                         poster={p.teaserVideo.poster}
                         autoPlay
                         loop
-                        className="h-full w-full"
-                        videoClassName="h-full w-full object-contain"
+                        flush
+                        className="absolute inset-0 h-full w-full"
+                        videoClassName="h-full w-full"
+                        videoStyle={{ objectFit: "contain" }}
                         controlLabel={ui.playPauseVideo || "Reproducir o pausar video"}
                       />
                       <div className="pointer-events-none absolute inset-0 halftone opacity-[0.08] mix-blend-overlay" />
@@ -773,41 +921,11 @@ function ExpandableCard({ p, i }) {
                 <ArtbookPreview config={p.artbookPreview} projectId={p.id} />
               )}
 
-              {/* Three-card project gallery (image / video / image supported) */}
+              {/* Supporting project gallery — same fixed card shape and
+                  click-to-enlarge interaction as the UNACH variations. */}
               {p.gallery && p.gallery.length > 0 && (
-                <motion.div
-                  variants={CONTAINER_VARIANTS}
-                  className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-3"
-                >
-                  {p.gallery.map((g, gi) => (
-                    <motion.div key={g.id} variants={ITEM_VARIANTS} className="deferred-paint-item">
-                      <div className={`special-image-float special-image-float--${(gi % 3) + 1}`}>
-                        <div className="media-glass relative aspect-[4/5] overflow-hidden border border-white/10">
-                          {g.type === "video" ? (
-                            <SmartVideo
-                              src={g.src}
-                              poster={g.poster}
-                              autoPlay
-                              loop
-                              className="absolute inset-0 h-full w-full"
-                              videoClassName="h-full w-full"
-                              videoStyle={{ objectFit: g.mediaFit || "contain", objectPosition: "center" }}
-                              controlLabel={ui.playPauseVideo || "Reproducir o pausar video"}
-                            />
-                          ) : (
-                            <AdaptiveImage
-                              src={g.image}
-                              alt={g.title || ""}
-                              className="absolute inset-0"
-                              contentClassName="transition-transform duration-700 hover:scale-[1.025]"
-                            />
-                          )}
-                          <div className="pointer-events-none absolute inset-0 halftone opacity-15 mix-blend-overlay" />
-                          <span className="media-label-chip bottom-2 left-2">0{gi + 1} · {g.title}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                <motion.div variants={CONTAINER_VARIANTS} className="mt-14">
+                  <ProjectGallery items={p.gallery} projectId={p.id} ui={ui} fixedRatio={false} showTagChip={false} />
                 </motion.div>
               )}
 
@@ -858,7 +976,7 @@ export default function SpecialProjects() {
       ref={sectionRef}
       id="special-projects"
       data-testid="section-special-projects"
-      className={`relative overflow-hidden border-t border-white/5 py-24 md:py-32 ${isVisible ? "viewport-active" : "viewport-paused"}`}
+      className={`relative scroll-mt-32 overflow-hidden border-t border-white/5 py-24 md:py-32 ${isVisible ? "viewport-active" : "viewport-paused"}`}
     >
       <HalftoneDecor variant="special" intensity="strong" />
       <CyberDecor variant="special" />

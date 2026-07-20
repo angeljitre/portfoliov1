@@ -19,7 +19,7 @@ export default function WorkCategories() {
     <section
       id="work"
       data-testid="section-work"
-      className="work-overview relative scroll-mt-20 overflow-hidden border-t border-white/5 pb-24 pt-20 md:pb-28 md:pt-24"
+      className="work-overview relative scroll-mt-32 overflow-hidden border-t border-white/5 pb-24 pt-20 md:pb-28 md:pt-24"
     >
       <HalftoneDecor variant="work" intensity="strong" />
       <CyberDecor variant="work" />

@@ -1,48 +1,169 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ArrowUpRight } from "lucide-react";
+import { X, ArrowUpRight, Play } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import HalftoneDecor from "./HalftoneDecor";
 import CyberDecor from "./CyberDecor";
+import SmartVideo from "./SmartVideo";
 
-// v27 — manual, hand-placed composition (not a generic repeating pattern).
-// Each span is chosen from the real dimensions of the file it sits on top
-// of, in the exact order the pieces are listed in siteContent.js, so the
-// column/row footprint roughly matches each piece's own aspect ratio:
-//   - wide banners (4:1 / 2:1 / ~1.8:1) get a full-width or half-width,
-//     short band.
-//   - tall portrait posters/invitations get a narrow, tall cell.
-//   - the square tote mockup gets a square cell.
-// Combined with [grid-auto-flow:dense] this keeps the irregular editorial
-// masonry rhythm while avoiding large empty cells, and — together with the
-// object-fit fix in index.css — the adaptive blurred background only has
-// to bridge a small gap instead of covering most of the cell.
-const COLLAGE_LAYOUT = [
-  "col-span-4 row-span-1 lg:col-span-12 lg:row-span-2",  // d15 banner-personal (4:1 wide)
-  "col-span-2 row-span-3 lg:col-span-3 lg:row-span-4",   // d2  poster-detras-colores (tall)
-  "col-span-2 row-span-3 lg:col-span-3 lg:row-span-4",   // d3  poster-bashequen (tall)
-  "col-span-2 row-span-2 lg:col-span-3 lg:row-span-3",   // d4  tote-bag-mockup (square)
-  "col-span-4 row-span-2 lg:col-span-6 lg:row-span-3",   // d16 banner-videomapping (2:1)
-  "col-span-2 row-span-3 lg:col-span-3 lg:row-span-4",   // d6  invitation-erika-andres (tall)
-  "col-span-2 row-span-3 lg:col-span-3 lg:row-span-4",   // d7  invitation-wendy-beth (tall)
-  "col-span-2 row-span-3 lg:col-span-2 lg:row-span-3",   // d8  menu-sweet-angel (very tall/narrow)
-  "col-span-4 row-span-2 lg:col-span-6 lg:row-span-4",   // d1  tote-bags-lifestyle (landscape)
-  "col-span-2 row-span-2 lg:col-span-3 lg:row-span-3",   // d9  poster-dia-mariachi
-  "col-span-2 row-span-2 lg:col-span-3 lg:row-span-3",   // d10 poster-inah
-  "col-span-2 row-span-2 lg:col-span-3 lg:row-span-3",   // d11 poster-aviso-aspirantes
-  "col-span-4 row-span-2 lg:col-span-6 lg:row-span-3",   // d17 banner-character (~1.8:1)
-  "col-span-2 row-span-2 lg:col-span-3 lg:row-span-3",   // d12 poster-feliz-cumple
-  "col-span-2 row-span-2 lg:col-span-3 lg:row-span-3",   // d13 poster-ventajas-unach
-  "col-span-2 row-span-2 lg:col-span-3 lg:row-span-3",   // d14 poster-posadas
-  "col-span-4 row-span-2 lg:col-span-12 lg:row-span-3",  // d5  quote-chulel (closing wide band)
-];
+// Justified rows (the Google Photos / Flickr technique): greedily fill a
+// row until it reaches the container width at a nominal row height, then
+// solve the row's *actual* height so every item's width (ratio × height)
+// sums exactly back to the container width. Every card ends up exactly
+// its own image's shape — never a quantized cell the image has to
+// letterbox or crop into — and every row closes flush with zero gap.
+// A trailing row that can't reach a full width on its own is dropped
+// rather than stretched or left short, since not every asset has to be
+// shown — a clean, fully justified board beats a complete but ragged one.
+function buildJustifiedRows(items, containerWidth, rowHeight, gap) {
+  if (!containerWidth) return [];
+  const rows = [];
+  let row = [];
+  let ratioSum = 0;
+
+  for (const item of items) {
+    const ratio = item.w / item.h;
+    row.push({ item, ratio });
+    ratioSum += ratio;
+    const widthAtNominal = ratioSum * rowHeight + (row.length - 1) * gap;
+    if (widthAtNominal >= containerWidth) {
+      const height = (containerWidth - (row.length - 1) * gap) / ratioSum;
+      rows.push({ height, cards: row.map((r) => ({ item: r.item, width: r.ratio * height })) });
+      row = [];
+      ratioSum = 0;
+    }
+  }
+  return rows;
+}
+
+function useElementWidth() {
+  const ref = useRef(null);
+  const [width, setWidth] = useState(0);
+
+  // Rounded, threshold-gated updates: ResizeObserver's contentRect and
+  // getBoundingClientRect() can disagree by a sub-pixel fraction on the
+  // same element, and without a guard that reads as a "real" width change
+  // to React — triggering a full row re-layout (and a page-height shift)
+  // moments after mount, which can cut short an in-progress smooth scroll
+  // to a section further down the page. Rounding to whole pixels and
+  // skipping no-op updates keeps the justified-row math stable once it's
+  // already correct.
+  const applyWidth = (next) => {
+    const rounded = Math.round(next);
+    setWidth((prev) => (prev === rounded ? prev : rounded));
+  };
+
+  // Synchronous initial measurement (covers browsers/environments where
+  // ResizeObserver's guaranteed first callback doesn't fire before paint)
+  // plus a plain window resize listener as a second fallback, on top of
+  // ResizeObserver for live container-only resizes (e.g. sidebar toggles
+  // that don't change window size).
+  useLayoutEffect(() => {
+    if (ref.current) applyWidth(ref.current.getBoundingClientRect().width);
+  }, []);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+
+    const measure = () => applyWidth(node.getBoundingClientRect().width);
+    measure();
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) applyWidth(entry.contentRect.width);
+    });
+    observer.observe(node);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  return [ref, width];
+}
+
+// Approved-layout exception: for the two flagged items only (g19, g26),
+// zoom the media past its own box and let overflow-hidden on the card
+// crop it evenly on all sides — card size/position stay exactly as the
+// justified-row layout computed them, only the media inside scales up.
+const SCALE_FILL_STYLE = {
+  position: "absolute",
+  top: "-12%",
+  left: "-12%",
+  width: "124%",
+  height: "124%",
+  maxWidth: "none",
+  maxHeight: "none",
+  objectFit: "cover",
+};
+
+function GalleryCard({ item, ui, onOpen }) {
+  return (
+    <motion.div
+      data-testid={`design-item-${item.id}`}
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        onOpen();
+      }}
+      className="deferred-paint-item media-glass group relative block cursor-pointer overflow-hidden border border-white/10 text-left"
+      style={{ width: "100%", height: "100%" }}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-10%" }}
+      transition={{ duration: 0.5, ease: [0.7, 0, 0.2, 1] }}
+      aria-label={item.alt || ui.openImage}
+    >
+      {item.type === "video" ? (
+        <SmartVideo
+          src={item.video}
+          poster={item.poster}
+          autoPlay
+          loop
+          flush
+          className="absolute inset-0 h-full w-full"
+          videoClassName="h-full w-full"
+          videoStyle={item.scaleFill ? SCALE_FILL_STYLE : { objectFit: "contain" }}
+          controlLabel={ui.playPauseVideo || "Reproducir o pausar video"}
+        />
+      ) : (
+        <img
+          src={item.image}
+          alt={item.alt || ""}
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          className="block h-full w-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.015]"
+          style={item.scaleFill ? SCALE_FILL_STYLE : undefined}
+        />
+      )}
+      <span className="media-label-chip bottom-3 left-3">{item.category}</span>
+      <span className="media-icon-chip absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full transition-all duration-300 group-hover:scale-105">
+        {item.type === "video" ? <Play size={12} fill="currentColor" /> : <ArrowUpRight size={13} />}
+      </span>
+    </motion.div>
+  );
+}
 
 export default function DesignGallery() {
   const { content: siteContent, ui } = useLanguage();
   const { designGallery } = siteContent;
   const [openId, setOpenId] = useState(null);
   const openItem = designGallery.items.find((item) => item.id === openId);
+  const [containerRef, containerWidth] = useElementWidth();
+
+  const rowHeight = Math.max(160, Math.min(320, containerWidth * 0.25));
+  const gap = containerWidth < 640 ? 8 : 12;
+  const rows = useMemo(
+    () => buildJustifiedRows(designGallery.items, containerWidth, rowHeight, gap),
+    [designGallery.items, containerWidth, rowHeight, gap],
+  );
 
   const close = () => setOpenId(null);
 
@@ -62,7 +183,7 @@ export default function DesignGallery() {
     <section
       id="design-gallery"
       data-testid="section-design-gallery"
-      className="relative overflow-hidden border-t border-white/5 py-24 md:py-40"
+      className="relative scroll-mt-32 overflow-hidden border-t border-white/5 py-24 md:py-40"
     >
       <HalftoneDecor variant="design" intensity="strong" />
       <CyberDecor variant="design" />
@@ -83,43 +204,16 @@ export default function DesignGallery() {
           {designGallery.heading}
         </motion.h2>
 
-        <div className="design-collage-grid grid auto-rows-[72px] grid-cols-4 gap-2 [grid-auto-flow:dense] sm:auto-rows-[84px] md:gap-3 lg:auto-rows-[94px] lg:grid-cols-12">
-          {designGallery.items.map((item, index) => (
-            <motion.button
-              key={item.id}
-              data-testid={`design-item-${item.id}`}
-              onClick={() => setOpenId(item.id)}
-              className={`deferred-paint-item media-glass group relative min-h-0 min-w-0 overflow-hidden border border-white/10 text-left ${COLLAGE_LAYOUT[index] || "col-span-2 row-span-2 lg:col-span-4 lg:row-span-2"}`}
-              initial={{ opacity: 0, y: 26 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.58, delay: (index % 4) * 0.045, ease: [0.7, 0, 0.2, 1] }}
-              aria-label={`${ui.openImage} ${index + 1}`}
-            >
-              <div className="adaptive-media-frame absolute inset-0">
-                <img
-                  src={item.image}
-                  alt=""
-                  aria-hidden="true"
-                  loading="lazy"
-                  decoding="async"
-                  className="adaptive-media-frame__backdrop"
-                />
-                <img
-                  src={item.image}
-                  alt={item.alt || ""}
-                  loading="lazy"
-                  decoding="async"
-                  fetchPriority="low"
-                  style={{ objectFit: item.fit || "contain" }}
-                  className="adaptive-media-frame__content transition-transform duration-700 ease-out group-hover:scale-[1.025]"
-                />
-                <div className="pointer-events-none absolute inset-0 halftone opacity-[0.09] mix-blend-overlay" />
-                <span className="media-icon-chip absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full transition-all duration-300 group-hover:scale-105">
-                  <ArrowUpRight size={13} />
-                </span>
-              </div>
-            </motion.button>
+        {/* Justified-row gallery — see buildJustifiedRows above. */}
+        <div ref={containerRef} className="justified-gallery" style={{ gap }}>
+          {rows.map((row, rowIndex) => (
+            <div key={rowIndex} className="justified-row" style={{ gap, height: row.height }}>
+              {row.cards.map(({ item, width }) => (
+                <div key={item.id} style={{ width, height: row.height, flexShrink: 0 }}>
+                  <GalleryCard item={item} ui={ui} onOpen={() => setOpenId(item.id)} />
+                </div>
+              ))}
+            </div>
           ))}
         </div>
       </div>
@@ -148,15 +242,36 @@ export default function DesignGallery() {
                 >
                   <X size={16} />
                 </button>
-                <motion.div
-                  className="media-lightbox__content media-lightbox__content--image"
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.97 }}
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <img src={openItem.image} alt={openItem.alt || ""} decoding="async" className="media-lightbox__image" />
-                </motion.div>
+                {openItem.type === "video" ? (
+                  <motion.div
+                    className="media-lightbox__content media-glass"
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <SmartVideo
+                      src={openItem.video}
+                      poster={openItem.poster}
+                      active={!!openId}
+                      autoPlay
+                      loop
+                      className="media-lightbox__video-wrap"
+                      videoClassName="media-lightbox__video"
+                      controlLabel={ui.playPauseVideo || "Reproducir o pausar video"}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    className="media-lightbox__content media-lightbox__content--image"
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <img src={openItem.image} alt={openItem.alt || ""} decoding="async" className="media-lightbox__image" />
+                  </motion.div>
+                )}
               </motion.div>
             </AnimatePresence>,
             document.body,

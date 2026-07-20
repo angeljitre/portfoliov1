@@ -22,6 +22,7 @@ const SmartVideo = forwardRef(function SmartVideo(
     onEnded,
     preload = "auto",
     controlLabel = "Reproducir o pausar video",
+    flush = false,
   },
   forwardedRef,
 ) {
@@ -200,8 +201,8 @@ const SmartVideo = forwardRef(function SmartVideo(
   const dashOffset = circumference * (1 - progress);
 
   return (
-    <div ref={hostRef} className={`smart-video ${className}`}>
-      {poster && (
+    <div ref={hostRef} className={`smart-video ${flush ? "smart-video--flush" : ""} ${className}`}>
+      {poster && !flush && (
         <img
           src={poster}
           alt=""

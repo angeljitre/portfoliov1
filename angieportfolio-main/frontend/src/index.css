@@ -26,6 +26,10 @@ html[data-theme="light"] {
   --accent-lilac-soft: rgba(159, 110, 210, 0.24);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   background: var(--site-bg);
@@ -36,6 +40,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-family: "Nevins", "Lora", "Manrope", system-ui, sans-serif;
   overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body::selection,
@@ -3996,12 +4006,6 @@ html[data-theme="light"] .ambient-orb {
   opacity: 0.74 !important;
 }
 
-@supports (content-visibility: auto) {
-  .deferred-paint-item {
-    content-visibility: auto;
-    contain-intrinsic-size: 320px 420px;
-  }
-}
 
 
 /* Performance-only: browsers may skip painting sections far outside the viewport.
@@ -4102,22 +4106,34 @@ html[data-theme="light"] .ambient-orb--smoke {
   z-index: 3;
 }
 
-/* Design images use a masonry flow and retain their complete source aspect
-   ratios. Nothing is forced into a banner or portrait crop. */
-.design-masonry {
-  column-fill: balance;
+/* Justified-row gallery: each row's height is solved in JS (see
+   buildJustifiedRows in DesignGallery.jsx) so that every card's width is
+   exactly ratio × rowHeight — the card is always exactly the image's own
+   shape, never a quantized grid cell the image has to fit into. That is
+   also what closes every row edge-to-edge with zero leftover gap, with no
+   letterboxing/blur/filler ever needed. Row height and gap come from
+   inline styles (computed per breakpoint), so this stylesheet only needs
+   to lay the rows out as a column and keep no-drift on filenames wrap. */
+.justified-gallery {
+  display: flex;
+  flex-direction: column;
 }
 
-.design-masonry .media-glass {
-  transform: translateZ(0);
+.justified-row {
+  display: flex;
+  min-width: 0;
 }
 
-.design-masonry img {
-  background: rgba(255,255,255,.025);
-}
-
-html[data-theme="light"] .design-masonry img {
-  background: rgba(16,16,18,.025);
+/* Project gallery cards (Ch'ulel / Bashequen / Navituxtla): stack full
+   width on mobile; from sm up, size each column to its own card's
+   content (not an equal 1fr share) and center the resulting track group
+   as a whole — so differently-sized cards in the same row (e.g.
+   Bashequen's wider 3D model next to its narrower poster) read as one
+   centered group instead of each centering inside a same-width slot. */
+@media (min-width: 640px) {
+  .project-gallery-grid {
+    grid-template-columns: repeat(var(--gallery-cols, 3), max-content);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4155,25 +4171,6 @@ html[data-theme="light"] .cyber-piece--bubble {
   opacity: 0.64 !important;
   filter: grayscale(1) contrast(1.16) brightness(0.62)
     drop-shadow(0 8px 12px rgba(15, 15, 18, 0.15)) !important;
-}
-
-/* The design gallery is built in complete horizontal bands: every group of
-   three portrait cards fills a row and each banner occupies its own full row. */
-.design-collage-grid {
-  align-items: stretch;
-}
-
-.design-collage-grid > button {
-  min-width: 0;
-  background: rgba(255, 255, 255, 0.025);
-}
-
-html[data-theme="light"] .design-collage-grid > button {
-  background: rgba(18, 18, 20, 0.035);
-}
-
-.design-collage-grid img {
-  backface-visibility: hidden;
 }
 
 /* Project cards that use contain retain the complete artwork while the card
@@ -4303,6 +4300,10 @@ html[data-theme="light"] .smart-video__backdrop {
   z-index: 0;
 }
 
+/* Flush variant: no backdrop layer is rendered (SmartVideo skips it), so
+   the video simply fills whatever box the caller sizes — normally a card
+   whose own aspect-ratio already matches the source video exactly. */
+
 .smart-video__poster,
 .smart-video video {
   z-index: 1;
@@ -4312,100 +4313,6 @@ html[data-theme="light"] .smart-video__backdrop {
 
 .smart-video video {
   contain: paint;
-}
-
-/* A closed rectangular collage with no unoccupied grid cells. */
-.design-collage-grid {
-  align-items: stretch;
-  overflow: hidden;
-  padding: 0.45rem;
-  border: 1px solid rgba(255,255,255,.1);
-  background: rgba(255,255,255,.018);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
-}
-
-.design-collage-grid > button {
-  min-width: 0;
-  min-height: 0;
-  margin: 0;
-}
-
-html[data-theme="light"] .design-collage-grid {
-  border-color: rgba(20,20,22,.14);
-  background: rgba(20,20,22,.025);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
-}
-
-/* Hero authorship note for Tavvi — kept as a small editorial aside tucked
-   into the empty right-hand margin, clear of the name, the rotating role
-   and the 3D model itself, instead of sitting over the center of the
-   composition. */
-.hero-model-note {
-  left: auto;
-  right: clamp(4.5rem, 8vw, 7.5rem);
-  top: clamp(14%, 18vh, 20%);
-  display: flex;
-  align-items: flex-start;
-  gap: .3rem;
-  max-width: 10.5rem;
-  color: rgba(255,255,255,.7);
-  transform: scale(.82);
-  transform-origin: top right;
-}
-
-.hero-model-note__arrow {
-  width: 3.6rem;
-  height: 2.3rem;
-  flex: 0 0 auto;
-  overflow: visible;
-}
-
-.hero-model-note__arrow path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.hero-model-note__text {
-  margin-top: 2.35rem;
-  font-family: "Jackwrite", "Special Elite", monospace;
-  font-size: .62rem;
-  line-height: 1.45;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-}
-
-.hero-model-note__text span,
-.hero-model-note__text strong {
-  display: block;
-}
-
-.hero-model-note__text strong {
-  margin-top: .2rem;
-  color: rgba(255,255,255,.96);
-  font-size: .72rem;
-}
-
-html[data-theme="light"] .hero-model-note {
-  color: rgba(18,18,20,.62);
-}
-
-html[data-theme="light"] .hero-model-note__text strong {
-  color: rgba(12,12,14,.94);
-}
-
-@media (max-width: 767px) {
-  .hero-model-note {
-    left: auto;
-    right: 3.4rem;
-    top: auto;
-    bottom: 8.6rem;
-    max-width: 9.5rem;
-    transform: scale(.72);
-    transform-origin: right bottom;
-  }
 }
 
 /* v27 — Official-publication link, redesigned as a small editorial press

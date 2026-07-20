@@ -31,16 +31,14 @@ class SplineErrorBoundary extends Component {
   }
 }
 
-const scrollTo = (id) => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const headerOffset = 94;
-  const top = el.getBoundingClientRect().top + window.scrollY - headerOffset;
-  window.scrollTo({ top, behavior: "smooth" });
-};
+// Relies on the target's own CSS scroll-margin-top (see index.css / each
+// section's scroll-mt-32) as the single source of truth for header
+// clearance, instead of a second hardcoded pixel offset here that could
+// drift out of sync with it.
 const scrollToWork = () => {
-  const id = window.matchMedia("(min-width: 768px)").matches ? "work-cards" : "work";
-  scrollTo(id);
+  const el = document.getElementById("work");
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
 function RotatingRoles({ roles }) {
@@ -162,7 +160,7 @@ export default function Hero({ ready, onSplineLoad, onSplineError }) {
   );
 
   return (
-    <section ref={sectionRef} id="hero" data-testid="section-hero" className="relative min-h-screen w-full overflow-hidden">
+    <section ref={sectionRef} id="hero" data-testid="section-hero" className="relative min-h-screen w-full scroll-mt-32 overflow-hidden">
       <HalftoneDecor variant="hero" intensity="soft" />
       <CyberDecor variant="hero" />
 
@@ -250,23 +248,6 @@ export default function Hero({ ready, onSplineLoad, onSplineError }) {
       </div>
 
       <span className="hero-spline-accent" aria-hidden="true" />
-
-      <motion.div
-        className="hero-model-note pointer-events-none absolute z-20"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: ready ? 1 : 0, y: ready ? 0 : 8 }}
-        transition={{ duration: 0.8, delay: 1.55 }}
-        aria-label={hero.modelNote}
-      >
-        <svg className="hero-model-note__arrow" viewBox="0 0 92 56" aria-hidden="true">
-          <path d="M5 48C31 48 27 12 67 14" />
-          <path d="M58 6L69 14L58 23" />
-        </svg>
-        <p className="hero-model-note__text">
-          <span>{hero.modelNote}</span>
-          <strong>{hero.modelName}</strong>
-        </p>
-      </motion.div>
 
       <motion.aside
         className="hero-social-rail pointer-events-auto absolute right-3 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-1 rounded-full border border-white/10 bg-black/50 p-1.5 backdrop-blur-xl sm:right-5 md:right-8"

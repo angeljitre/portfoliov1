@@ -277,7 +277,7 @@ export default function Projects3D() {
       ref={sectionRef}
       id="projects-3d"
       data-testid="section-projects-3d"
-      className={`relative overflow-hidden border-t border-white/5 py-24 md:py-40 ${isVisible ? "viewport-active" : "viewport-paused"}`}
+      className={`relative scroll-mt-32 overflow-hidden border-t border-white/5 py-24 md:py-40 ${isVisible ? "viewport-active" : "viewport-paused"}`}
     >
       <HalftoneDecor variant="projects" intensity="strong" />
       <CyberDecor variant="projects" />
