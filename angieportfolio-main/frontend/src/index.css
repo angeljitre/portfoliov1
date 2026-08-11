@@ -162,6 +162,7 @@ body::selection,
 }
 .marquee-track {
   animation: marquee-x 45s linear infinite;
+  will-change: transform;
 }
 
 /* Sparkle pulse */
@@ -669,6 +670,7 @@ input[type="number"]::-webkit-inner-spin-button {
   mask-composite: exclude;
   opacity: 0.72;
   animation: contact-border-sweep 5.8s ease-in-out infinite;
+  will-change: opacity;
 }
 
 .contact-form-glow::after {
@@ -687,6 +689,7 @@ input[type="number"]::-webkit-inner-spin-button {
   filter: blur(24px);
   opacity: 0.42;
   animation: contact-form-breathe 5.4s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes contact-border-sweep {
@@ -1051,6 +1054,7 @@ html[data-theme="light"] .hero-social-link {
   opacity: 0.34;
   filter: drop-shadow(0 0 9px rgba(215, 215, 215, 0.22));
   animation: sculpt-star-twinkle 5.6s ease-in-out infinite;
+  will-change: opacity;
 }
 
 .sculpt-star::before,

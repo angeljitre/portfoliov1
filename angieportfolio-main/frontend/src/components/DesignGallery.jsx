@@ -5,6 +5,7 @@ import { X, ArrowUpRight, Play } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import HalftoneDecor from "./HalftoneDecor";
 import SmartVideo from "./SmartVideo";
+import { revealUp, cardReveal } from "../lib/motion";
 
 // Justified rows (the Google Photos / Flickr technique): greedily fill a
 // row until it reaches the container width at a nominal row height, then
@@ -99,7 +100,7 @@ const SCALE_FILL_STYLE = {
   objectFit: "cover",
 };
 
-function GalleryCard({ item, ui, onOpen }) {
+function GalleryCard({ item, ui, onOpen, index = 0 }) {
   return (
     <motion.div
       data-testid={`design-item-${item.id}`}
@@ -113,10 +114,7 @@ function GalleryCard({ item, ui, onOpen }) {
       }}
       className="deferred-paint-item media-glass group relative block cursor-pointer overflow-hidden border border-white/10 text-left"
       style={{ width: "100%", height: "100%" }}
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.5, ease: [0.7, 0, 0.2, 1] }}
+      {...cardReveal(index, { y: 18, duration: 0.5 })}
       aria-label={item.alt || ui.openImage}
     >
       {item.type === "video" ? (
@@ -193,22 +191,21 @@ export default function DesignGallery() {
         </div>
 
         <motion.h2
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+          {...revealUp()}
           className="mb-14 max-w-3xl font-heading text-4xl uppercase tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
         >
           {designGallery.heading}
         </motion.h2>
 
-        {/* Justified-row gallery — see buildJustifiedRows above. */}
+        {/* Justified-row gallery — see buildJustifiedRows above. Stagger is
+            per-column-within-row (not global index) so every row's cascade
+            restarts left-to-right instead of drifting later with each row. */}
         <div ref={containerRef} className="justified-gallery" style={{ gap }}>
           {rows.map((row, rowIndex) => (
             <div key={rowIndex} className="justified-row" style={{ gap, height: row.height }}>
-              {row.cards.map(({ item, width }) => (
+              {row.cards.map(({ item, width }, colIndex) => (
                 <div key={item.id} style={{ width, height: row.height, flexShrink: 0 }}>
-                  <GalleryCard item={item} ui={ui} onOpen={() => setOpenId(item.id)} />
+                  <GalleryCard item={item} ui={ui} onOpen={() => setOpenId(item.id)} index={colIndex} />
                 </div>
               ))}
             </div>

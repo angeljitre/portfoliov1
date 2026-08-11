@@ -13,6 +13,7 @@ import { useTheme } from "../hooks/useTheme";
 import { getProjectLogo, getSoftwareLogo } from "../lib/logoAssets";
 import HalftoneDecor from "./HalftoneDecor";
 import SmartVideo from "./SmartVideo";
+import { revealUp } from "../lib/motion";
 
 // Shared tool monogram lookup
 const TOOL_MONO = {
@@ -653,10 +654,7 @@ function ExpandableCard({ p, i }) {
   return (
     <motion.article
       data-testid={`special-project-${p.id}`}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.8, ease: [0.7, 0, 0.2, 1] }}
+      {...revealUp(0, { y: 40 })}
       className="special-project-card relative mx-auto max-w-7xl overflow-visible border-t border-white/10 px-5 py-16 md:px-10 md:py-24"
     >
       {/* Collapsed grid — staggered entrance */}
@@ -988,10 +986,7 @@ export default function SpecialProjects() {
         </div>
 
         <motion.h2
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+          {...revealUp()}
           className="section-title max-w-5xl font-heading uppercase tracking-tight text-white"
         >
           {specialProjects.heading}

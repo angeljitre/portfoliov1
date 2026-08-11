@@ -4,16 +4,14 @@ import { Download } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import { getSoftwareLogo } from "../lib/logoAssets";
 import HalftoneDecor from "./HalftoneDecor";
+import { revealUp } from "../lib/motion";
 
 function ToolIcon({ tool, i }) {
   const logo = getSoftwareLogo(tool.name);
   return (
     <motion.div
       data-testid={`tool-${tool.name.toLowerCase().replace(/\s+/g, "-")}`}
-      initial={{ opacity: 0, y: 14 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.55, delay: i * 0.05, ease: [0.7, 0, 0.2, 1] }}
+      {...revealUp(i * 0.05, { y: 14, duration: 0.55 })}
       className="group relative flex items-center justify-center"
       title={tool.name}
     >
@@ -93,20 +91,14 @@ export default function About() {
           {/* Left: compact copy + toolkit */}
           <div className="col-span-12 md:col-span-7 lg:col-span-8">
             <motion.h2
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+              {...revealUp()}
               className="section-title font-heading uppercase tracking-tight text-white"
             >
               {ui.aboutHeading}
             </motion.h2>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.9, delay: 0.1, ease: [0.7, 0, 0.2, 1] }}
+              {...revealUp(0.1)}
               className="mt-6 max-w-xl font-body text-base leading-relaxed text-white/70 md:text-lg"
             >
               {about.intro}
@@ -114,14 +106,7 @@ export default function About() {
 
             {about.lookingFor && (
               <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-10%" }}
-                transition={{
-                  duration: 0.9,
-                  delay: 0.2,
-                  ease: [0.7, 0, 0.2, 1],
-                }}
+                {...revealUp(0.2)}
                 className="mt-4 max-w-xl font-body text-sm leading-relaxed text-white/50 md:text-base"
               >
                 {about.lookingFor}

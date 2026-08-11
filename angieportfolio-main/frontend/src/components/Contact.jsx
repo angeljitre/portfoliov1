@@ -5,6 +5,7 @@ import emailjs from "@emailjs/browser";
 import { Mail, MapPin, Send, Loader2 } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import HalftoneDecor from "./HalftoneDecor";
+import { revealUp } from "../lib/motion";
 
 function LetterGlowHeading({ text }) {
   let letterIndex = 0;
@@ -12,10 +13,7 @@ function LetterGlowHeading({ text }) {
 
   return (
     <motion.h2
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+      {...revealUp()}
       className="contact-letter-heading font-heading font-black uppercase tracking-tight text-white"
       aria-label={text}
     >
@@ -160,10 +158,7 @@ export default function Contact() {
             onSubmit={handleSubmit}
             className="col-span-12 md:col-span-6 lg:col-span-7"
             noValidate
-            initial={{ opacity: 0, y: 32 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-10%" }}
-            transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+            {...revealUp(0, { y: 32 })}
           >
             <div
               className="contact-form-glow contact-form-panel relative rounded-2xl border border-white/12 p-6 md:p-10"

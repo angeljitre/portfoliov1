@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import HalftoneDecor from "./HalftoneDecor";
+import { revealUp, cardReveal } from "../lib/motion";
 
 const scrollTo = (id) => {
   const el = document.getElementById(id);
@@ -33,10 +34,7 @@ export default function WorkCategories() {
         </div>
 
         <motion.h2
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+          {...revealUp()}
           className="mb-10 max-w-3xl font-heading text-4xl uppercase tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
         >
           {workCategories.heading}
@@ -44,9 +42,10 @@ export default function WorkCategories() {
 
         {/* Desktop expandable panels */}
         <div id="work-cards" className="hidden gap-3 md:flex md:h-[min(520px,58vh)] md:min-h-[430px]">
-          {workCategories.items.map((c) => {
+          {workCategories.items.map((c, idx) => {
             const isActive = active === c.id;
             const noneActive = active === null;
+            const reveal = cardReveal(idx);
             return (
               <motion.button
                 key={c.id}
@@ -57,10 +56,13 @@ export default function WorkCategories() {
                 onBlur={() => setActive(null)}
                 onClick={() => scrollTo(c.id)}
                 className="media-glass relative flex-1 overflow-hidden border border-white/10 text-left"
+                initial={reveal.initial}
+                whileInView={reveal.whileInView}
+                viewport={reveal.viewport}
                 animate={{
                   flex: noneActive ? 1 : isActive ? 2.2 : 0.7,
                 }}
-                transition={{ duration: 0.7, ease: [0.7, 0, 0.2, 1] }}
+                transition={{ ...reveal.transition, flex: { duration: 0.7, ease: [0.7, 0, 0.2, 1] } }}
               >
                 {/* Background */}
                 <motion.div
@@ -107,12 +109,13 @@ export default function WorkCategories() {
 
         {/* Mobile stacked cards */}
         <div className="flex flex-col gap-4 md:hidden">
-          {workCategories.items.map((c) => (
-            <button
+          {workCategories.items.map((c, idx) => (
+            <motion.button
               key={c.id}
               data-testid={`work-cat-mobile-${c.id}`}
               onClick={() => scrollTo(c.id)}
               className="media-glass relative h-56 overflow-hidden border border-white/10 text-left"
+              {...cardReveal(idx)}
             >
               <div
                 className="absolute inset-0 bg-cover bg-center opacity-40"
@@ -132,7 +135,7 @@ export default function WorkCategories() {
                   </p>
                 </div>
               </div>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>

@@ -5,6 +5,7 @@ import { getSoftwareLogo } from "../lib/logoAssets";
 import HalftoneDecor from "./HalftoneDecor";
 import StackCarousel from "./StackCarousel";
 import SmartVideo from "./SmartVideo";
+import { revealUp, cardReveal } from "../lib/motion";
 
 // Monogram lookup — keep tool badges consistent with About toolkit
 const TOOL_MONO = {
@@ -66,10 +67,7 @@ function AnimationTest({ test, projectId }) {
   return (
     <motion.section
       data-testid={`animation-test-${projectId}`}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+      {...revealUp()}
       className="mx-auto w-full max-w-5xl border-t border-white/10 pb-16 pt-10 md:pb-24 md:pt-14"
     >
       <div className="mb-6 flex items-end justify-between">
@@ -112,10 +110,7 @@ function ProjectRow({ p, i }) {
   return (
     <motion.article
       data-testid={`project-3d-${p.id}`}
-      initial={{ opacity: 0, y: 60 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+      {...revealUp(0, { y: 60 })}
       className="project-row relative grid grid-cols-12 gap-8 overflow-visible border-t border-white/10 py-14 md:gap-12 md:py-24"
     >
       <div className={`relative z-10 col-span-12 md:col-span-6 ${flip ? "md:order-2" : ""}`}>
@@ -180,10 +175,7 @@ function EnvironmentProject({ p, i }) {
   return (
     <motion.article
       data-testid={`environment-${p.id}`}
-      initial={{ opacity: 0, y: 60 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+      {...revealUp(0, { y: 60 })}
       className="relative overflow-visible border-t border-white/10 py-16 md:py-24"
     >
       {/* Centered header */}
@@ -238,9 +230,10 @@ function EnvironmentProject({ p, i }) {
         {["maya", "untextured", "final"].map((k, ki) => {
           const f = p.frames[k];
           return (
-            <div
+            <motion.div
               key={k}
               className="media-glass relative aspect-[4/3] overflow-hidden border border-white/10"
+              {...cardReveal(ki, { y: 24 })}
             >
               <img
                 src={f.image}
@@ -254,7 +247,7 @@ function EnvironmentProject({ p, i }) {
               <span className="media-label-chip bottom-2 left-2">
                 0{ki + 1} · {f.label}
               </span>
-            </div>
+            </motion.div>
           );
         })}
       </div>
@@ -307,10 +300,7 @@ export default function Projects3D() {
         </div>
 
         <motion.h2
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+          {...revealUp()}
           className="section-title mb-8 max-w-4xl font-heading uppercase tracking-tight text-white"
         >
           {projects3D.heading}
@@ -339,10 +329,7 @@ export default function Projects3D() {
               </span>
             </div>
             <motion.h3
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+              {...revealUp()}
               className="mb-6 font-heading text-3xl uppercase tracking-tight text-white sm:text-4xl md:text-5xl"
             >
               {environments.heading}

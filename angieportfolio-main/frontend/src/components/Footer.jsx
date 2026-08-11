@@ -1,6 +1,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { useLanguage } from "../hooks/useLanguage";
+import { revealUp } from "../lib/motion";
 
 export default function Footer() {
   const { content: siteContent, ui } = useLanguage();
@@ -32,16 +33,16 @@ export default function Footer() {
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-10%" }}
-        transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
+        {...revealUp()}
         className="relative z-10 mx-auto flex max-w-7xl items-center justify-between gap-8 px-5 md:px-10"
       >
         <div data-testid="footer-logo" className="flex items-center">
           <img
             src={meta.logoPath}
             alt="Angélica Jiménez"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
             className="theme-logo h-12 w-16 object-contain"
           />
         </div>
