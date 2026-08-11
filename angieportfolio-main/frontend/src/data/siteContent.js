@@ -265,23 +265,22 @@ export const siteContentBase = {
             "Lighting/render",
           ],
           video: {
-            src: "INSERT_ENV_01_VIDEO_URL_HERE",
+            src: "/assets/3d/beach/video.mp4",
             fallback: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-            poster:
-              "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=80&auto=format&fit=crop",
+            poster: "/assets/3d/beach/poster.jpg",
           },
           frames: {
             maya: {
-              label: "Maya working view",
-              image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1200&q=80&auto=format&fit=crop",
+              label: "WIREFRAME",
+              image: "/assets/3d/beach/maya.webp",
             },
             untextured: {
-              label: "Untextured version",
-              image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=1200&q=80&auto=format&fit=crop",
+              label: "SOLID SHADING",
+              image: "/assets/3d/beach/untextured.webp",
             },
             final: {
-              label: "Final render",
-              image: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=80&auto=format&fit=crop",
+              label: "TEXTURED VIEWPORT",
+              image: "/assets/3d/beach/final.webp",
             },
           },
         },
@@ -299,23 +298,22 @@ export const siteContentBase = {
             "Lighting/render",
           ],
           video: {
-            src: "INSERT_ENV_02_VIDEO_URL_HERE",
+            src: "/assets/3d/cabin/video.mp4",
             fallback: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-            poster:
-              "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1600&q=80&auto=format&fit=crop",
+            poster: "/assets/3d/cabin/poster.jpg",
           },
           frames: {
             maya: {
-              label: "Maya working view",
-              image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=1200&q=80&auto=format&fit=crop",
+              label: "WIREFRAME",
+              image: "/assets/3d/cabin/maya.webp",
             },
             untextured: {
-              label: "Untextured version",
-              image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1200&q=80&auto=format&fit=crop",
+              label: "SOLID SHADING",
+              image: "/assets/3d/cabin/untextured.webp",
             },
             final: {
-              label: "Final render",
-              image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1200&q=80&auto=format&fit=crop",
+              label: "TEXTURED VIEWPORT",
+              image: "/assets/3d/cabin/final.webp",
             },
           },
         },
@@ -334,23 +332,22 @@ export const siteContentBase = {
             "Render",
           ],
           video: {
-            src: "INSERT_ENV_03_VIDEO_URL_HERE",
+            src: "/assets/3d/tavern/video.mp4",
             fallback: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-            poster:
-              "https://images.unsplash.com/photo-1490604001847-b712b0c2f967?w=1600&q=80&auto=format&fit=crop",
+            poster: "/assets/3d/tavern/poster.jpg",
           },
           frames: {
             maya: {
-              label: "Maya working view",
-              image: "https://images.unsplash.com/photo-1547153760-18fc86324498?w=1200&q=80&auto=format&fit=crop",
+              label: "WIREFRAME",
+              image: "/assets/3d/tavern/maya.webp",
             },
             untextured: {
-              label: "Untextured version",
-              image: "https://images.unsplash.com/photo-1476136236990-838240be4859?w=1200&q=80&auto=format&fit=crop",
+              label: "SOLID SHADING",
+              image: "/assets/3d/tavern/untextured.webp",
             },
             final: {
-              label: "Final render",
-              image: "https://images.unsplash.com/photo-1490604001847-b712b0c2f967?w=1200&q=80&auto=format&fit=crop",
+              label: "TEXTURED VIEWPORT",
+              image: "/assets/3d/tavern/final.webp",
             },
           },
         },
@@ -696,9 +693,9 @@ const spanishCopy = {
   "PBR materials": "Materiales PBR",
   "Sandstorm FX": "Efectos de tormenta de arena",
   "Lighting/render": "Iluminación y render",
-  "Maya working view": "Vista de trabajo en Maya",
-  "Untextured version": "Versión sin texturas",
-  "Final render": "Render final",
+  "WIREFRAME": "MALLA",
+  "SOLID SHADING": "BLOQUE",
+  "TEXTURED VIEWPORT": "TEXTURAS",
   "Snow Cabin": "Cabaña nevada",
   "Snowy cabin focused on modeling, texturing, composition, and weather effects.": "Cabaña nevada enfocada en modelado, texturizado, composición y efectos climáticos.",
   "Snow/atmosphere FX": "Efectos de nieve y atmósfera",
