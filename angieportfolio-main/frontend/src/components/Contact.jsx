@@ -5,7 +5,6 @@ import emailjs from "@emailjs/browser";
 import { Mail, MapPin, Send, Loader2 } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import HalftoneDecor from "./HalftoneDecor";
-import CyberDecor from "./CyberDecor";
 
 function LetterGlowHeading({ text }) {
   let letterIndex = 0;
@@ -118,7 +117,6 @@ export default function Contact() {
       className={`relative overflow-hidden border-t border-white/5 py-24 md:py-40 ${isVisible ? "viewport-active" : "viewport-paused"}`}
     >
       <HalftoneDecor variant="contact" intensity="soft" />
-      <CyberDecor variant="contact" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-10">
         <div className="mb-14 flex items-end justify-between">

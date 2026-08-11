@@ -43,6 +43,13 @@ function App() {
     return () => window.clearTimeout(timer);
   }, []);
 
+  // Safety fallback: if the Spline scene's onLoad never fires (slow network,
+  // dropped request), don't trap the user on the loader forever.
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSplineLoaded(true), 4500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = ready ? "" : "hidden";
     return () => {

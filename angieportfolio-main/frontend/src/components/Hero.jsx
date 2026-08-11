@@ -5,7 +5,6 @@ import { useLanguage } from "../hooks/useLanguage";
 import angelicaWordmark from "../assets/branding/angelica-vixa.svg";
 import jimenezWordmark from "../assets/branding/jimenez-vixa.svg";
 import HalftoneDecor from "./HalftoneDecor";
-import CyberDecor from "./CyberDecor";
 
 const Spline = lazy(() => import("@splinetool/react-spline"));
 
@@ -154,15 +153,22 @@ export default function Hero({ ready, onSplineLoad, onSplineError }) {
     (app) => {
       splineAppRef.current = app;
       syncSplinePlayback();
-      onSplineLoad?.(app);
+      // Spline's onLoad fires once the scene data is ready, not necessarily
+      // once the canvas has actually painted that first frame — dismissing
+      // the loader on the same tick can show a blank/pop-in flash. Wait two
+      // animation frames so the browser has painted before we reveal it.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          onSplineLoad?.(app);
+        });
+      });
     },
     [onSplineLoad, syncSplinePlayback],
   );
 
   return (
     <section ref={sectionRef} id="hero" data-testid="section-hero" className="relative min-h-screen w-full scroll-mt-32 overflow-hidden">
-      <HalftoneDecor variant="hero" intensity="soft" />
-      <CyberDecor variant="hero" />
+      <HalftoneDecor variant="hero" intensity="normal" />
 
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="spline-hero spline-hero-frame absolute inset-y-0 left-[19%] right-[-3%] md:left-[26%] md:right-[0%] lg:left-[29%] lg:right-[2%]">

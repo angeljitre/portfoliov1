@@ -12,7 +12,6 @@ import { useLanguage } from "../hooks/useLanguage";
 import { useTheme } from "../hooks/useTheme";
 import { getProjectLogo, getSoftwareLogo } from "../lib/logoAssets";
 import HalftoneDecor from "./HalftoneDecor";
-import CyberDecor from "./CyberDecor";
 import SmartVideo from "./SmartVideo";
 
 // Shared tool monogram lookup
@@ -660,8 +659,6 @@ function ExpandableCard({ p, i }) {
       transition={{ duration: 0.8, ease: [0.7, 0, 0.2, 1] }}
       className="special-project-card relative mx-auto max-w-7xl overflow-visible border-t border-white/10 px-5 py-16 md:px-10 md:py-24"
     >
-      <CyberDecor variant={`specialRow${i % 4}`} />
-
       {/* Collapsed grid — staggered entrance */}
       <motion.div
         variants={CONTAINER_VARIANTS}
@@ -979,7 +976,6 @@ export default function SpecialProjects() {
       className={`relative scroll-mt-32 overflow-hidden border-t border-white/5 py-24 md:py-32 ${isVisible ? "viewport-active" : "viewport-paused"}`}
     >
       <HalftoneDecor variant="special" intensity="strong" />
-      <CyberDecor variant="special" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-10">
         <div className="mb-14 flex items-end justify-between">

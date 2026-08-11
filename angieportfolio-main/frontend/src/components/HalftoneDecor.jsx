@@ -1,52 +1,134 @@
 import { memo, useRef } from "react";
 import { useInView } from "framer-motion";
 
+// Soft blurred glow orbs + small cross-bar sparkles — the only background
+// decoration system on the site (chrome/metallic pieces were removed).
+// Coordinates come from a seeded scatter generator (rejection-sampled, min
+// edge-to-edge gap enforced) so nothing clusters, spread across the section's
+// full height to fill the empty voids rather than hugging the top margins.
+// `about` and `contact` are intentionally left untouched (already balanced) —
+// every other section got extra orbs/sparks layered in on top of its
+// original set, still respecting the same min-gap rule against everything
+// already there.
+//
+// Each orb renders as two nested elements so its two animations never fight
+// over the same CSS `transform` property: the outer `.ambient-orb-wrap`
+// carries the float/drift/breathe position drift (translate3d), the inner
+// `.ambient-orb` carries the `.ambient-heartbeat` pulse (scale + opacity).
+// `delay` staggers the wrap's drift, `pulseDelay` staggers the inner pulse,
+// independently, so glows never beat in sync with each other.
 const layouts = {
   hero: [
-    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-breathe", className: "right-[7%] top-[17%]" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-float-a", className: "left-[8%] bottom-[14%]", delay: "1.1s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[14%] bottom-[20%]", delay: "0.4s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[13%] top-[29%]", delay: "1.5s" },
+    // Large ambient glow orb. NOTE: .hero-depth-gradient (a separate layer
+    // painted above this one, z-0 vs this wrapper's z--10) is a two-axis
+    // vignette — solid-dark along the left edge fading out by x=61%, and
+    // solid-dark along the bottom fading out above y=67% — so anywhere in
+    // that left/bottom band is fully masked no matter how bright the orb
+    // is. This position sits inside the gradient's actual clear window
+    // (x>61%, y 28-67%), which also keeps it under the Spline frame's
+    // transparent canvas margin rather than off past its left edge.
+    { type: "orb", size: "ambient-orb--xl", tone: "ambient-orb--pearl", motion: "ambient-breathe", className: "right-[11%] top-[21%]", delay: "0.4s", pulseDelay: "1.6s" },
+    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[0%] top-[29%]", delay: "0.6s", pulseDelay: "0.3s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "right-[4%] top-[16%]", delay: "1.4s", pulseDelay: "3.0s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[25%] bottom-[23%]", delay: "2.1s", pulseDelay: "2.0s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "right-[31%] top-[27%]", delay: "0.6s", pulseDelay: "2.7s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "left-[38%] top-[22%]", delay: "2.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[43%] top-[9%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--lg", className: "left-[44%] top-[1%]", delay: "0.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[42%] bottom-[5%]", delay: "0.8s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[42%] bottom-[32%]", delay: "1.3s" },
   ],
   about: [
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--silver", motion: "ambient-float-b", className: "left-[7%] top-[25%]" },
-    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--pearl", motion: "ambient-breathe", className: "right-[7%] bottom-[13%]", delay: "0.9s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[10%] top-[23%]", delay: "1.1s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "left-[17%] bottom-[16%]", delay: "2.1s" },
+    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[28%] top-[3%]", delay: "0.6s", pulseDelay: "0.3s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "right-[13%] top-[0%]", delay: "1.4s", pulseDelay: "3.0s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "left-[34%] bottom-[17%]", delay: "2.1s", pulseDelay: "2.0s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--silver", motion: "ambient-breathe", className: "left-[2%] bottom-[44%]", delay: "2.9s", pulseDelay: "0.9s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "left-[18%] top-[29%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[30%] bottom-[25%]", delay: "0.3s" },
+    { type: "spark", scale: "ambient-sparkle--lg", className: "right-[41%] bottom-[7%]", delay: "1.8s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[38%] bottom-[44%]", delay: "0.8s" },
   ],
   work: [
-    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--smoke", motion: "ambient-float-a", className: "right-[7%] top-[12%]" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--silver", motion: "ambient-drift", className: "left-[8%] bottom-[11%]", delay: "0.8s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "left-[12%] top-[21%]", delay: "0.4s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[13%] bottom-[17%]", delay: "1.8s" },
+    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "right-[7%] bottom-[21%]", delay: "0.6s", pulseDelay: "0.3s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[34%] bottom-[0%]", delay: "1.4s", pulseDelay: "3.0s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "left-[5%] bottom-[43%]", delay: "2.1s", pulseDelay: "2.0s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "left-[7%] top-[23%]", delay: "0.6s", pulseDelay: "2.7s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-float-b", className: "right-[22%] top-[12%]", delay: "1.3s", pulseDelay: "3.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[45%] bottom-[8%]", delay: "2.3s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[20%] top-[30%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--lg", className: "left-[2%] bottom-[13%]", delay: "0.3s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[3%] top-[8%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[45%] top-[29%]", delay: "1.8s" },
   ],
   projects: [
-    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-b", className: "left-[6%] top-[10%]" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-breathe", className: "right-[8%] top-[43%]", delay: "0.9s" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "left-[9%] bottom-[8%]", delay: "1.8s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[12%] top-[18%]", delay: "0.6s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "left-[17%] top-[58%]", delay: "1.9s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[16%] bottom-[13%]", delay: "2.5s" },
+    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "right-[18%] top-[29%]", delay: "0.6s", pulseDelay: "0.3s" },
+    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[8%] bottom-[24%]", delay: "1.4s", pulseDelay: "3.0s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[21%] bottom-[18%]", delay: "2.1s", pulseDelay: "2.0s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--silver", motion: "ambient-breathe", className: "right-[31%] top-[8%]", delay: "2.9s", pulseDelay: "0.9s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "right-[10%] top-[3%]", delay: "3.6s", pulseDelay: "3.6s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "left-[18%] top-[19%]", delay: "0.6s", pulseDelay: "2.7s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[49%] bottom-[5%]", delay: "0.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[25%] top-[10%]", delay: "1.8s" },
+    { type: "spark", scale: "ambient-sparkle--lg", className: "right-[5%] top-[44%]", delay: "0.8s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[12%] bottom-[29%]", delay: "2.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[7%] top-[14%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[3%] bottom-[36%]", delay: "0.8s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "left-[49%] top-[10%]", delay: "1.3s" },
   ],
   design: [
-    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "right-[6%] top-[13%]" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-breathe", className: "left-[7%] bottom-[15%]", delay: "1.1s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[12%] top-[19%]", delay: "0.8s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[14%] bottom-[12%]", delay: "1.8s" },
+    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[5%] bottom-[34%]", delay: "0.6s", pulseDelay: "0.3s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[0%] top-[13%]", delay: "1.4s", pulseDelay: "3.0s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[20%] top-[31%]", delay: "2.1s", pulseDelay: "2.0s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "left-[31%] top-[23%]", delay: "0.6s", pulseDelay: "2.7s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-float-b", className: "right-[41%] bottom-[40%]", delay: "1.3s", pulseDelay: "3.3s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "left-[24%] top-[22%]", delay: "2.3s" },
+    { type: "spark", scale: "ambient-sparkle--lg", className: "left-[32%] bottom-[46%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[27%] bottom-[45%]", delay: "0.3s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[6%] bottom-[29%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[8%] bottom-[9%]", delay: "1.8s" },
   ],
   special: [
-    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[6%] top-[15%]" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[8%] top-[53%]", delay: "1s" },
-    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--silver", motion: "ambient-breathe", className: "left-[11%] bottom-[9%]", delay: "2s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[11%] top-[18%]", delay: "0.5s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[16%] top-[61%]", delay: "2.2s" },
+    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[0%] bottom-[0%]", delay: "0.6s", pulseDelay: "0.3s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[24%] bottom-[28%]", delay: "1.4s", pulseDelay: "3.0s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[8%] bottom-[7%]", delay: "2.1s", pulseDelay: "2.0s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--silver", motion: "ambient-breathe", className: "right-[16%] top-[14%]", delay: "2.9s", pulseDelay: "0.9s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "left-[39%] bottom-[10%]", delay: "0.6s", pulseDelay: "2.7s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[31%] top-[3%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[27%] bottom-[28%]", delay: "0.3s" },
+    { type: "spark", scale: "ambient-sparkle--lg", className: "right-[29%] bottom-[39%]", delay: "1.8s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[14%] top-[4%]", delay: "0.8s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[41%] top-[18%]", delay: "0.8s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "right-[36%] top-[34%]", delay: "1.3s" },
   ],
   contact: [
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-float-a", className: "left-[8%] top-[24%]" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--silver", motion: "ambient-breathe", className: "right-[8%] bottom-[12%]", delay: "1.2s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[12%] top-[18%]", delay: "0.7s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[19%] bottom-[18%]", delay: "2s" },
+    { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[25%] bottom-[9%]", delay: "0.6s", pulseDelay: "0.3s" },
+    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "right-[29%] top-[18%]", delay: "1.4s", pulseDelay: "3.0s" },
+    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "left-[2%] bottom-[10%]", delay: "2.1s", pulseDelay: "2.0s" },
+    { type: "spark", scale: "ambient-sparkle--md", className: "left-[15%] bottom-[23%]", delay: "2.3s" },
+    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[12%] top-[21%]", delay: "1.3s" },
+    { type: "spark", scale: "ambient-sparkle--lg", className: "left-[3%] bottom-[33%]", delay: "0.3s" },
   ],
+};
+
+// Deterministic 0..1 pseudo-random (GLSL-style sine hash) — not Math.random,
+// so every instance gets a stable jitter value instead of reshuffling on
+// every re-render.
+const pseudoFrac = (n) => {
+  const x = Math.sin(n * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+const seedFor = (variant, index, salt) => {
+  let h = salt;
+  for (let i = 0; i < variant.length; i++) h = h * 31 + variant.charCodeAt(i);
+  return h + index * 97;
+};
+
+const MOTION_BASE_DURATION = {
+  "ambient-float-a": 12,
+  "ambient-float-b": 14,
+  "ambient-drift": 15,
+  "ambient-breathe": 10,
 };
 
 function HalftoneDecor({ variant = "about", intensity = "normal" }) {
@@ -64,28 +146,57 @@ function HalftoneDecor({ variant = "about", intensity = "normal" }) {
     <div
       ref={rootRef}
       aria-hidden="true"
-      className={`ambient-decor pointer-events-none absolute inset-0 z-[1] overflow-hidden ${intensityClass} ${isVisible ? "ambient-decor--active" : "ambient-decor--paused"}`}
+      className={`ambient-decor pointer-events-none absolute inset-0 z-[-10] overflow-hidden ${intensityClass} ${isVisible ? "ambient-decor--active" : "ambient-decor--paused"}`}
     >
       <div className="ambient-texture" />
       <div className="ambient-sheen" />
 
       {items.map((item, index) => {
         if (item.type === "spark") {
+          // Negative delay: the twinkle starts already mid-cycle instead of
+          // every sparkle visibly beginning from frame 0 together. Duration
+          // is jittered per-instance so none of them ever re-sync.
+          const baseDelay = parseFloat(item.delay || "0");
+          const twinkleDelay = -(baseDelay + pseudoFrac(seedFor(variant, index, 11)) * 3).toFixed(2);
+          const twinkleDuration = (3.6 + pseudoFrac(seedFor(variant, index, 23)) * 2.4).toFixed(2);
           return (
             <span
               key={`${variant}-spark-${index}`}
-              style={{ animationDelay: item.delay || "0s" }}
+              style={{
+                "--twinkle-delay": `${twinkleDelay}s`,
+                "--twinkle-duration": `${twinkleDuration}s`,
+              }}
               className={`ambient-sparkle ${item.scale} ${item.className}`}
             />
           );
         }
 
+        const baseMotionDelay = parseFloat(item.delay || "0");
+        const motionDelay = -(baseMotionDelay + pseudoFrac(seedFor(variant, index, 37)) * 4).toFixed(2);
+        const motionBase = MOTION_BASE_DURATION[item.motion] || 12;
+        const motionDuration = (motionBase * (0.8 + pseudoFrac(seedFor(variant, index, 41)) * 0.4)).toFixed(2);
+
+        const basePulseDelay = parseFloat(item.pulseDelay || "0");
+        const pulseDelay = -(basePulseDelay + pseudoFrac(seedFor(variant, index, 59)) * 3).toFixed(2);
+        const pulseDuration = (3.2 + pseudoFrac(seedFor(variant, index, 67)) * 2.3).toFixed(2);
+
         return (
           <div
             key={`${variant}-orb-${index}`}
-            style={{ animationDelay: item.delay || "0s" }}
-            className={`ambient-orb ${item.size} ${item.tone} ${item.motion} ${item.className}`}
-          />
+            style={{
+              "--motion-delay": `${motionDelay}s`,
+              "--motion-duration": `${motionDuration}s`,
+            }}
+            className={`ambient-orb-wrap ${item.motion} ${item.className}`}
+          >
+            <div
+              style={{
+                "--pulse-delay": `${pulseDelay}s`,
+                "--pulse-duration": `${pulseDuration}s`,
+              }}
+              className={`ambient-orb ${item.size} ${item.tone} ambient-heartbeat`}
+            />
+          </div>
         );
       })}
     </div>

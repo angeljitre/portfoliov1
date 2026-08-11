@@ -4,7 +4,6 @@ import { Download } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import { getSoftwareLogo } from "../lib/logoAssets";
 import HalftoneDecor from "./HalftoneDecor";
-import CyberDecor from "./CyberDecor";
 
 function ToolIcon({ tool, i }) {
   const logo = getSoftwareLogo(tool.name);
@@ -71,7 +70,6 @@ export default function About() {
       className={`relative overflow-hidden border-t border-white/5 py-20 md:py-28 ${isVisible ? "viewport-active" : "viewport-paused"}`}
     >
       <HalftoneDecor variant="about" intensity="strong" />
-      <CyberDecor variant="about" />
 
       {/* Background slow marquee */}
       <div className="pointer-events-none absolute inset-x-0 top-6 overflow-hidden opacity-[0.06] select-none">

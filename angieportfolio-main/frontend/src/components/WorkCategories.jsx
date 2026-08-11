@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import HalftoneDecor from "./HalftoneDecor";
-import CyberDecor from "./CyberDecor";
 
 const scrollTo = (id) => {
   const el = document.getElementById(id);
@@ -22,7 +21,6 @@ export default function WorkCategories() {
       className="work-overview relative scroll-mt-32 overflow-hidden border-t border-white/5 pb-24 pt-20 md:pb-28 md:pt-24"
     >
       <HalftoneDecor variant="work" intensity="strong" />
-      <CyberDecor variant="work" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-10">
         <div className="mb-14 flex items-end justify-between">

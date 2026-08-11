@@ -3,7 +3,6 @@ import { useRef } from "react";
 import { useLanguage } from "../hooks/useLanguage";
 import { getSoftwareLogo } from "../lib/logoAssets";
 import HalftoneDecor from "./HalftoneDecor";
-import CyberDecor from "./CyberDecor";
 import StackCarousel from "./StackCarousel";
 import SmartVideo from "./SmartVideo";
 
@@ -119,8 +118,6 @@ function ProjectRow({ p, i }) {
       transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
       className="project-row relative grid grid-cols-12 gap-8 overflow-visible border-t border-white/10 py-14 md:gap-12 md:py-24"
     >
-      <CyberDecor variant={`projectRow${i % 4}`} />
-
       <div className={`relative z-10 col-span-12 md:col-span-6 ${flip ? "md:order-2" : ""}`}>
         <StackCarousel
           gallery={gallery}
@@ -189,7 +186,6 @@ function EnvironmentProject({ p, i }) {
       transition={{ duration: 0.9, ease: [0.7, 0, 0.2, 1] }}
       className="relative overflow-visible border-t border-white/10 py-16 md:py-24"
     >
-      <CyberDecor variant={`environmentRow${i % 2}`} />
       {/* Centered header */}
       <div className="relative z-10 mx-auto max-w-3xl text-center">
         <span className="font-mono-label text-[10px] text-white/40">
@@ -280,7 +276,6 @@ export default function Projects3D() {
       className={`relative scroll-mt-32 overflow-hidden border-t border-white/5 py-24 md:py-40 ${isVisible ? "viewport-active" : "viewport-paused"}`}
     >
       <HalftoneDecor variant="projects" intensity="strong" />
-      <CyberDecor variant="projects" />
       <div
         aria-hidden="true"
         className="sculpt-star-field pointer-events-none absolute inset-0 z-[2] overflow-hidden"

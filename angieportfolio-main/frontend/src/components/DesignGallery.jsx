@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, ArrowUpRight, Play } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import HalftoneDecor from "./HalftoneDecor";
-import CyberDecor from "./CyberDecor";
 import SmartVideo from "./SmartVideo";
 
 // Justified rows (the Google Photos / Flickr technique): greedily fill a
@@ -186,7 +185,6 @@ export default function DesignGallery() {
       className="relative scroll-mt-32 overflow-hidden border-t border-white/5 py-24 md:py-40"
     >
       <HalftoneDecor variant="design" intensity="strong" />
-      <CyberDecor variant="design" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 md:px-10">
         <div className="mb-14 flex items-end justify-between gap-4">
