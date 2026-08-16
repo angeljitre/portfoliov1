@@ -89,9 +89,10 @@ export default function Contact() {
           ejs.serviceId,
           ejs.templateId,
           {
-            from_name: form.name,
-            from_email: form.email,
+            name: form.name,
+            email: form.email,
             message: form.message,
+            time: new Date().toLocaleString("es-MX"),
           },
           { publicKey: ejs.publicKey },
         );
