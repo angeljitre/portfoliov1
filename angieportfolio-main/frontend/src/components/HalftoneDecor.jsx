@@ -4,12 +4,14 @@ import { useInView } from "framer-motion";
 // Soft blurred glow orbs + small cross-bar sparkles — the only background
 // decoration system on the site (chrome/metallic pieces were removed).
 // Coordinates come from a seeded scatter generator (rejection-sampled, min
-// edge-to-edge gap enforced) so nothing clusters, spread across the section's
-// full height to fill the empty voids rather than hugging the top margins.
-// `about` and `contact` are intentionally left untouched (already balanced) —
-// every other section got extra orbs/sparks layered in on top of its
-// original set, still respecting the same min-gap rule against everything
-// already there.
+// edge-to-edge gap enforced) so nothing clusters.
+//
+// Kept deliberately light: ~5-8 pieces per section (~40 total sitewide,
+// trimmed down from an earlier ~68-piece pass that was too heavy — each
+// orb is a blurred, continuously-animating, GPU-layer-promoted element,
+// and that count compounded into real strain). See the `.ambient-orb`
+// rule in index.css for how `will-change` is scoped to only the section
+// currently in view, so idle/off-screen sections hold no GPU layers.
 //
 // Each orb renders as two nested elements so its two animations never fight
 // over the same CSS `transform` property: the outer `.ambient-orb-wrap`
@@ -29,14 +31,9 @@ const layouts = {
     // transparent canvas margin rather than off past its left edge.
     { type: "orb", size: "ambient-orb--xl", tone: "ambient-orb--pearl", motion: "ambient-breathe", className: "right-[11%] top-[21%]", delay: "0.4s", pulseDelay: "1.6s" },
     { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[0%] top-[29%]", delay: "0.6s", pulseDelay: "0.3s" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "right-[4%] top-[16%]", delay: "1.4s", pulseDelay: "3.0s" },
     { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[25%] bottom-[23%]", delay: "2.1s", pulseDelay: "2.0s" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "right-[31%] top-[27%]", delay: "0.6s", pulseDelay: "2.7s" },
     { type: "spark", scale: "ambient-sparkle--md", className: "left-[38%] top-[22%]", delay: "2.3s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[43%] top-[9%]", delay: "1.3s" },
     { type: "spark", scale: "ambient-sparkle--lg", className: "left-[44%] top-[1%]", delay: "0.3s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[42%] bottom-[5%]", delay: "0.8s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[42%] bottom-[32%]", delay: "1.3s" },
   ],
   about: [
     { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[28%] top-[3%]", delay: "0.6s", pulseDelay: "0.3s" },
@@ -52,53 +49,31 @@ const layouts = {
     { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "right-[7%] bottom-[21%]", delay: "0.6s", pulseDelay: "0.3s" },
     { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[34%] bottom-[0%]", delay: "1.4s", pulseDelay: "3.0s" },
     { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "left-[5%] bottom-[43%]", delay: "2.1s", pulseDelay: "2.0s" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "left-[7%] top-[23%]", delay: "0.6s", pulseDelay: "2.7s" },
-    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-float-b", className: "right-[22%] top-[12%]", delay: "1.3s", pulseDelay: "3.3s" },
     { type: "spark", scale: "ambient-sparkle--sm", className: "right-[45%] bottom-[8%]", delay: "2.3s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[20%] top-[30%]", delay: "1.3s" },
     { type: "spark", scale: "ambient-sparkle--lg", className: "left-[2%] bottom-[13%]", delay: "0.3s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[3%] top-[8%]", delay: "1.3s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[45%] top-[29%]", delay: "1.8s" },
   ],
   projects: [
     { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "right-[18%] top-[29%]", delay: "0.6s", pulseDelay: "0.3s" },
     { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[8%] bottom-[24%]", delay: "1.4s", pulseDelay: "3.0s" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[21%] bottom-[18%]", delay: "2.1s", pulseDelay: "2.0s" },
     { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--silver", motion: "ambient-breathe", className: "right-[31%] top-[8%]", delay: "2.9s", pulseDelay: "0.9s" },
-    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "right-[10%] top-[3%]", delay: "3.6s", pulseDelay: "3.6s" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "left-[18%] top-[19%]", delay: "0.6s", pulseDelay: "2.7s" },
     { type: "spark", scale: "ambient-sparkle--md", className: "right-[49%] bottom-[5%]", delay: "0.3s" },
     { type: "spark", scale: "ambient-sparkle--sm", className: "left-[25%] top-[10%]", delay: "1.8s" },
     { type: "spark", scale: "ambient-sparkle--lg", className: "right-[5%] top-[44%]", delay: "0.8s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[12%] bottom-[29%]", delay: "2.3s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[7%] top-[14%]", delay: "1.3s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[3%] bottom-[36%]", delay: "0.8s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "left-[49%] top-[10%]", delay: "1.3s" },
   ],
   design: [
     { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[5%] bottom-[34%]", delay: "0.6s", pulseDelay: "0.3s" },
     { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[0%] top-[13%]", delay: "1.4s", pulseDelay: "3.0s" },
     { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[20%] top-[31%]", delay: "2.1s", pulseDelay: "2.0s" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "left-[31%] top-[23%]", delay: "0.6s", pulseDelay: "2.7s" },
-    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--smoke", motion: "ambient-float-b", className: "right-[41%] bottom-[40%]", delay: "1.3s", pulseDelay: "3.3s" },
     { type: "spark", scale: "ambient-sparkle--md", className: "left-[24%] top-[22%]", delay: "2.3s" },
     { type: "spark", scale: "ambient-sparkle--lg", className: "left-[32%] bottom-[46%]", delay: "1.3s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[27%] bottom-[45%]", delay: "0.3s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[6%] bottom-[29%]", delay: "1.3s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "right-[8%] bottom-[9%]", delay: "1.8s" },
   ],
   special: [
     { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[0%] bottom-[0%]", delay: "0.6s", pulseDelay: "0.3s" },
     { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--pearl", motion: "ambient-float-b", className: "left-[24%] bottom-[28%]", delay: "1.4s", pulseDelay: "3.0s" },
-    { type: "orb", size: "ambient-orb--md", tone: "ambient-orb--smoke", motion: "ambient-drift", className: "right-[8%] bottom-[7%]", delay: "2.1s", pulseDelay: "2.0s" },
     { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--silver", motion: "ambient-breathe", className: "right-[16%] top-[14%]", delay: "2.9s", pulseDelay: "0.9s" },
-    { type: "orb", size: "ambient-orb--sm", tone: "ambient-orb--pearl", motion: "ambient-float-a", className: "left-[39%] bottom-[10%]", delay: "0.6s", pulseDelay: "2.7s" },
     { type: "spark", scale: "ambient-sparkle--sm", className: "left-[31%] top-[3%]", delay: "1.3s" },
     { type: "spark", scale: "ambient-sparkle--md", className: "right-[27%] bottom-[28%]", delay: "0.3s" },
     { type: "spark", scale: "ambient-sparkle--lg", className: "right-[29%] bottom-[39%]", delay: "1.8s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[14%] top-[4%]", delay: "0.8s" },
-    { type: "spark", scale: "ambient-sparkle--sm", className: "left-[41%] top-[18%]", delay: "0.8s" },
-    { type: "spark", scale: "ambient-sparkle--md", className: "right-[36%] top-[34%]", delay: "1.3s" },
   ],
   contact: [
     { type: "orb", size: "ambient-orb--lg", tone: "ambient-orb--silver", motion: "ambient-float-a", className: "left-[25%] bottom-[9%]", delay: "0.6s", pulseDelay: "0.3s" },

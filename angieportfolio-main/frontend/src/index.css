@@ -89,10 +89,6 @@ body::selection,
     font-family: "Gyrotrope", "Michroma", "Clash Display", sans-serif;
     font-weight: 600;
   }
-  .font-editorial {
-    font-family: "Gyrotrope", "Michroma", "Clash Display", sans-serif;
-    font-weight: 400;
-  }
   .font-body {
     font-family: "Nevins", "Lora", "Manrope", system-ui, serif;
   }
@@ -162,7 +158,6 @@ body::selection,
 }
 .marquee-track {
   animation: marquee-x 45s linear infinite;
-  will-change: transform;
 }
 
 /* Sparkle pulse */
@@ -179,24 +174,6 @@ body::selection,
 }
 .sparkle {
   animation: sparkle 4s ease-in-out infinite;
-}
-
-/* Vertical mask for slot machine */
-.slot-mask {
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 25%,
-    black 75%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 25%,
-    black 75%,
-    transparent 100%
-  );
 }
 
 /* Reduced motion */
@@ -282,16 +259,41 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Two-layer orb: the wrap handles float/drift/breathe position drift
    (translate3d only), the inner .ambient-orb handles the heartbeat pulse
    (scale + opacity). Splitting them means the two animations never fight
-   over the same `transform` property. */
+   over the same `transform` property.
+
+   GPU-safety: `will-change` is deliberately NOT set here on the base rule.
+   With ~20 orbs across 7 sections, an unconditional `will-change` promotes
+   every one of them to its own compositor layer for the entire page
+   lifetime, even while off-screen and animation-paused — that's a standing
+   GPU/VRAM cost that never goes away, and was confirmed (via computed
+   style in a real browser) to be exactly what an old duplicate rule
+   further down this file was still doing even after this scoping was
+   first added, because an unconditional selector doesn't "lose" to a
+   scoped one when the scoped one's ancestor class isn't present — it's
+   just uncontested. That duplicate has been removed; `will-change` is
+   scoped ONLY here, under `.ambient-decor--active`, so only the section
+   currently near the viewport holds any promoted layers.
+
+   Blur radius is intentionally NOT set here either — the actual value
+   (`.ambient-orb { filter: blur(26px) !important; }`, with per-size
+   overrides) lives further down this file, already at a deliberately
+   reduced radius from an earlier pass (see that rule's own comment). Don't
+   set filter here too; a second, lower-priority declaration for the same
+   property just becomes dead code that can never win the cascade. */
 .ambient-orb-wrap {
   position: absolute;
-  will-change: transform;
 }
 
 .ambient-orb {
   border-radius: 9999px;
-  filter: blur(70px);
   mix-blend-mode: screen;
+}
+
+.ambient-decor--active .ambient-orb-wrap {
+  will-change: transform;
+}
+
+.ambient-decor--active .ambient-orb {
   will-change: transform, opacity;
 }
 
@@ -308,13 +310,11 @@ input[type="number"]::-webkit-inner-spin-button {
 .ambient-orb--md {
   width: clamp(9rem, 16vw, 16rem);
   height: clamp(9rem, 16vw, 16rem);
-  filter: blur(54px);
 }
 
 .ambient-orb--sm {
   width: clamp(5rem, 9vw, 9rem);
   height: clamp(5rem, 9vw, 9rem);
-  filter: blur(36px);
 }
 
 .ambient-orb--silver {
@@ -557,32 +557,6 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: translateY(-10px) rotate(0deg) scale(1.015);
 }
 
-.special-image-float:hover .special-image-zoom {
-  animation: none;
-  transform: scale(1.1);
-}
-
-.special-image-zoom {
-  animation: special-image-zoom 9s ease-in-out infinite;
-}
-
-.special-image-sheen {
-  position: absolute;
-  inset: -30% -55%;
-  pointer-events: none;
-  background: linear-gradient(
-    110deg,
-    transparent 35%,
-    rgba(255, 255, 255, 0.03) 43%,
-    rgba(255, 255, 255, 0.19) 50%,
-    rgba(255, 255, 255, 0.035) 57%,
-    transparent 65%
-  );
-  transform: translateX(-45%) rotate(4deg);
-  mix-blend-mode: screen;
-  animation: special-image-sheen 4.8s ease-in-out infinite;
-}
-
 @keyframes special-image-float-a {
   0%,
   100% {
@@ -610,32 +584,6 @@ input[type="number"]::-webkit-inner-spin-button {
   }
   50% {
     transform: translate3d(0, -9px, 0) rotate(0.4deg);
-  }
-}
-
-@keyframes special-image-zoom {
-  0%,
-  100% {
-    transform: scale(1.01);
-  }
-  50% {
-    transform: scale(1.065);
-  }
-}
-
-@keyframes special-image-sheen {
-  0%,
-  18% {
-    transform: translateX(-48%) rotate(4deg);
-    opacity: 0;
-  }
-  32% {
-    opacity: 0.68;
-  }
-  55%,
-  100% {
-    transform: translateX(48%) rotate(4deg);
-    opacity: 0;
   }
 }
 
@@ -670,7 +618,6 @@ input[type="number"]::-webkit-inner-spin-button {
   mask-composite: exclude;
   opacity: 0.72;
   animation: contact-border-sweep 5.8s ease-in-out infinite;
-  will-change: opacity;
 }
 
 .contact-form-glow::after {
@@ -689,7 +636,6 @@ input[type="number"]::-webkit-inner-spin-button {
   filter: blur(24px);
   opacity: 0.42;
   animation: contact-form-breathe 5.4s ease-in-out infinite;
-  will-change: transform, opacity;
 }
 
 @keyframes contact-border-sweep {
@@ -722,8 +668,6 @@ input[type="number"]::-webkit-inner-spin-button {
 
 @media (prefers-reduced-motion: reduce) {
   .special-image-float,
-  .special-image-zoom,
-  .special-image-sheen,
   .contact-form-glow::before,
   .contact-form-glow::after {
     animation: none !important;
@@ -1054,7 +998,6 @@ html[data-theme="light"] .hero-social-link {
   opacity: 0.34;
   filter: drop-shadow(0 0 9px rgba(215, 215, 215, 0.22));
   animation: sculpt-star-twinkle 5.6s ease-in-out infinite;
-  will-change: opacity;
 }
 
 .sculpt-star::before,
@@ -1153,63 +1096,6 @@ html[data-theme="light"] .sculpt-star::after {
   );
 }
 
-/* Contact heading: visible moving perimeter instead of glowing letters. */
-.contact-heading-frame {
-  isolation: isolate;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
-}
-
-.contact-heading-frame::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  border-radius: inherit;
-  padding: 1.5px;
-  background: conic-gradient(
-    from var(--contact-angle),
-    transparent 0deg,
-    transparent 270deg,
-    rgba(255, 255, 255, 0.16) 302deg,
-    rgba(255, 255, 255, 0.98) 330deg,
-    rgba(211, 177, 255, 0.86) 347deg,
-    transparent 360deg
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  filter: drop-shadow(0 0 10px rgba(221, 199, 255, 0.48));
-  animation: contact-perimeter-spin 4.6s linear infinite;
-}
-
-.contact-heading-frame__inner {
-  background: rgba(5, 5, 5, 0.92);
-}
-
-@property --contact-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes contact-perimeter-spin {
-  to {
-    --contact-angle: 360deg;
-  }
-}
-
-html[data-theme="light"] .contact-heading-frame {
-  background: rgba(17, 16, 20, 0.13);
-  box-shadow: 0 0 0 1px rgba(17, 16, 20, 0.07);
-}
-
-html[data-theme="light"] .contact-heading-frame__inner {
-  background: rgba(244, 242, 246, 0.94);
-}
-
 /* Stronger saver-like travel around the form edge. */
 .contact-form-glow::before {
   background: conic-gradient(
@@ -1261,7 +1147,6 @@ html[data-theme="light"] .contact-form-glow::after {
 
 @media (prefers-reduced-motion: reduce) {
   .sculpt-star,
-  .contact-heading-frame::before,
   .contact-form-glow::before {
     animation: none !important;
   }
@@ -1376,37 +1261,6 @@ html[data-theme="light"] .hero-depth-gradient {
   color: var(--contact-letter-base);
   animation: contact-letter-wave 5.4s ease-in-out infinite;
   animation-delay: calc(var(--letter-index) * 72ms);
-  will-change: color, filter, transform, text-shadow;
-}
-
-.contact-letter--space {
-  width: 0.34em;
-}
-
-@keyframes contact-letter-wave {
-  0%,
-  58%,
-  100% {
-    color: var(--contact-letter-base);
-    transform: translateY(0);
-    text-shadow: none;
-    filter: none;
-  }
-  66% {
-    color: var(--contact-letter-hot);
-    transform: translateY(-1px);
-    text-shadow:
-      0 0 6px rgba(255, 255, 255, 0.96),
-      0 0 17px var(--contact-letter-aura),
-      0 0 34px rgba(95, 205, 226, 0.32);
-    filter: brightness(1.24);
-  }
-  73% {
-    color: var(--contact-letter-base);
-    transform: translateY(0);
-    text-shadow: 0 0 8px rgba(150, 229, 245, 0.18);
-    filter: none;
-  }
 }
 
 html[data-theme="light"] .contact-letter-heading {
@@ -1776,32 +1630,6 @@ html[data-theme="light"] .ambient-sparkle::after {
   --contact-letter-aura: rgba(160, 235, 249, 0.92);
 }
 
-@keyframes contact-letter-wave {
-  0%,
-  52%,
-  100% {
-    color: var(--contact-letter-base);
-    transform: translateY(0);
-    text-shadow: none;
-    filter: none;
-  }
-  61% {
-    color: var(--contact-letter-hot);
-    transform: translateY(-1px);
-    text-shadow:
-      0 0 7px rgba(255, 255, 255, 1),
-      0 0 20px var(--contact-letter-aura),
-      0 0 42px rgba(89, 207, 229, 0.48);
-    filter: brightness(1.42);
-  }
-  70% {
-    color: var(--contact-letter-base);
-    transform: translateY(0);
-    text-shadow: 0 0 11px rgba(150, 229, 245, 0.26);
-    filter: none;
-  }
-}
-
 /* Ensure the moving line belongs only to the form and is easy to notice. */
 .contact-form-glow::before {
   opacity: 0.95 !important;
@@ -1905,15 +1733,9 @@ html[data-theme="light"] [class~="to-[#050505]"] {
   transform: translateX(-0.5vw) scale(0.95) !important;
   transform-origin: 50% 52% !important;
 }
-.hero-name-title {
-  max-width: 36rem;
-}
 @media (min-width: 1280px) {
   .spline-hero-frame {
     transform: translateX(-1vw) scale(0.94) !important;
-  }
-  .hero-name-title {
-    max-width: 40rem;
   }
 }
 @media (max-width: 767px) {
@@ -2235,13 +2057,6 @@ html[data-theme="light"] .stack-carousel__arrow {
   max-height: 88vh;
   overflow: hidden;
 }
-.media-lightbox__media {
-  display: block;
-  width: 100%;
-  max-height: 88vh;
-  object-fit: contain;
-  background: #0c0c0f;
-}
 .media-lightbox__close,
 .media-lightbox__arrow {
   position: absolute;
@@ -2452,19 +2267,13 @@ body {
 }
 
 .font-display,
-.font-heading,
-.font-editorial {
+.font-heading {
   font-family: var(--heading-stack) !important;
 }
 
 .font-heading {
   font-weight: 850 !important;
   letter-spacing: -0.04em;
-}
-
-.font-editorial {
-  font-weight: 750 !important;
-  letter-spacing: -0.03em;
 }
 
 .font-body {
@@ -2499,8 +2308,7 @@ section > div > div > .font-heading.text-4xl {
 }
 
 .project-row h3,
-.special-project-card h3,
-.environment-project h3 {
+.special-project-card h3 {
   text-wrap: balance;
   overflow-wrap: normal;
   word-break: normal;
@@ -2736,14 +2544,6 @@ html[data-theme="light"] .smart-video__progress {
   place-items: center;
   overflow: hidden;
   background: #0b0b0d !important;
-}
-
-.media-lightbox__media {
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain !important;
 }
 
 .media-lightbox .smart-video {
@@ -3082,12 +2882,6 @@ html[data-theme="light"] .ambient-sheen {
     radial-gradient(circle at 76% 62%, rgba(18, 18, 20, 0.055), transparent 30%) !important;
 }
 
-.ambient-orb {
-  filter: none !important;
-  opacity: 0.82;
-  will-change: transform, opacity;
-}
-
 .ambient-orb--silver {
   background: radial-gradient(circle, rgba(238, 238, 240, 0.2) 0%, rgba(190, 190, 194, 0.105) 35%, rgba(120, 120, 124, 0.035) 62%, transparent 78%) !important;
 }
@@ -3269,12 +3063,6 @@ html[data-theme="light"] .media-lightbox__image {
   -webkit-backdrop-filter: blur(5px) !important;
 }
 
-/* Deferred code-split sections reserve a small neutral area while loading. */
-.deferred-section-placeholder {
-  min-height: 45vh;
-  background: var(--site-bg);
-}
-
 /* Keep mobile logos and lightboxes proportional rather than shrinking content. */
 @media (max-width: 767px) {
   .project-logo-frame {
@@ -3322,8 +3110,6 @@ html[data-theme="light"] .media-lightbox__image {
    viewport, and pause every animation while the browser tab is hidden. */
 .viewport-paused .marquee-track,
 .viewport-paused .special-image-float,
-.viewport-paused .special-image-zoom,
-.viewport-paused .special-image-sheen,
 .viewport-paused .sculpt-star,
 .viewport-paused .contact-letter,
 .viewport-paused .contact-form-glow,
@@ -3540,45 +3326,12 @@ html[data-theme="light"] .artbook-preview .media-glass img {
   perspective: 1400px;
 }
 
-.artbook-lightbox__stage {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: min(88vw, 88rem);
-  max-height: 86vh;
-  transform-style: preserve-3d;
-}
-
-.artbook-lightbox__page {
-  display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 82vh;
-  object-fit: contain;
-  object-position: center;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  background: #08080a;
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
-  user-select: none;
-}
-
 .artbook-lightbox__counter {
   position: absolute;
   right: 0.8rem;
   bottom: -2rem;
   color: rgba(255, 255, 255, 0.72);
   font-size: 0.65rem;
-}
-
-@media (max-width: 767px) {
-  .artbook-lightbox__stage {
-    width: calc(100vw - 2rem);
-  }
-
-  .artbook-lightbox__page {
-    max-height: 76vh;
-  }
 }
 
 /* ========================================================================== */
@@ -3591,18 +3344,7 @@ html[data-theme="light"] .artbook-preview .media-glass img {
   filter: brightness(0.7) saturate(0.92) !important;
 }
 
-/* Adaptive media fill: a soft extension of the same artwork fills the card,
-   while the original remains complete and centered above it. */
-.adaptive-media-frame {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  isolation: isolate;
-  background: #0b0b0d;
-}
-
-.adaptive-media-frame__backdrop,
+/* Soft blurred backdrop extension behind SmartVideo's poster/video. */
 .smart-video__backdrop {
   position: absolute;
   inset: -9%;
@@ -3617,22 +3359,6 @@ html[data-theme="light"] .artbook-preview .media-glass img {
   pointer-events: none;
 }
 
-.adaptive-media-frame__content {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  padding: clamp(2px, 0.35vw, 6px);
-}
-
-html[data-theme="light"] .adaptive-media-frame {
-  background: #d8d6d1;
-}
-
-html[data-theme="light"] .adaptive-media-frame__backdrop,
 html[data-theme="light"] .smart-video__backdrop {
   filter: blur(19px) saturate(1.12) brightness(0.9) contrast(0.92);
   opacity: 0.72;
@@ -3977,7 +3703,6 @@ html[data-theme="light"] .stack-carousel__media-backdrop {
    backdrop behind them, letting the intended elegant extension show
    through instead of a flat black stripe. Kept at the end of the file so
    it reliably wins the cascade over the earlier, more generic rule. */
-.adaptive-media-frame__content,
 .stack-carousel__media,
 .smart-video video {
   background: transparent !important;
