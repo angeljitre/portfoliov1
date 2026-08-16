@@ -4,31 +4,18 @@ import { Menu, X, Moon, Sun } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import { useTheme } from "../hooks/useTheme";
 
-export default function Navigation({ ready }) {
-  const [open, setOpen] = useState(false);
-  const { content: siteContent, ui, language, setLanguage } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+const scrollTo = (id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
 
-  // La función scrollTo va aquí adentro:
-  const scrollTo = (id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
+  const navBarOffset = 80;
+  const elementPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
 
-    const navBarOffset = 80;
-    const elementPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
-
-    window.scrollTo({
-      top: elementPosition,
-      behavior: "smooth",
-    });
-  };
-
-  return (
-    // Tu código JSX del menú...
-  );
-}
-
-export default Navigation;
+  window.scrollTo({
+    top: elementPosition,
+    behavior: "smooth",
+  });
+};
 
 function LanguageSwitch({ language, setLanguage, label }) {
   return (
