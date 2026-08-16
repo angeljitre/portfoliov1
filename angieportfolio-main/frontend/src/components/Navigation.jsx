@@ -8,24 +8,17 @@ const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
 
-  // Si hacen clic en Contacto, va directo al fondo total de la página sin frenarse
+  const navBarOffset = 80;
+  const elementPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
+
+  // Si es contacto, salta inmediatamente sin dar tiempo a que React cancele la animación
   if (id === "contact" || id === "contacto") {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: elementPosition, behavior: "auto" });
     return;
   }
 
-  // Para las demás secciones (Sobre mí, Trabajo, etc.):
-  const navBarOffset = 80;
-  const elementPosition = el.getBoundingClientRect().top;
-  const offsetPosition = elementPosition + window.scrollY - navBarOffset;
-
-  window.scrollTo({
-    top: offsetPosition,
-    behavior: "smooth",
-  });
+  // Para las demás secciones mantiene el scroll suave
+  window.scrollTo({ top: elementPosition, behavior: "smooth" });
 };
 
 function LanguageSwitch({ language, setLanguage, label }) {
