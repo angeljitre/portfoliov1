@@ -3806,3 +3806,8 @@ html[data-theme="light"] .ambient-orb {
     animation: none !important;
   }
 }
+
+/* Reserva el espacio completo de la pantalla para evitar saltos */
+section {
+  min-height: 100vh;
+}
