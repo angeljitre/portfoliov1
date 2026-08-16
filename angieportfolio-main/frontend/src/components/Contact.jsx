@@ -41,7 +41,14 @@ function LetterGlowHeading({ text }) {
 
 export default function Contact() {
   const { content: siteContent, ui } = useLanguage();
-  const { contact, emailjs: ejs } = siteContent;
+  const { contact } = siteContent;
+
+  const ejs = {
+    serviceId: "service_041scg6",   // Cambia por el de EmailJS (ej. service_abc123)
+    templateId: "template_5mka468", // Cambia por el de EmailJS (ej. template_xyz456)
+    publicKey: "0dQT4AfNUVkjcfS8X",
+  };
+
   const [form, setForm] = useState({
     name: "",
     email: "",
