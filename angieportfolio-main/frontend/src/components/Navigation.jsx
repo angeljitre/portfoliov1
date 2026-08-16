@@ -7,7 +7,16 @@ import { useTheme } from "../hooks/useTheme";
 const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  // 80 es la altura en píxeles de tu barra de navegación fija para que no tape el título
+  const navBarOffset = 80; 
+  const elementPosition = el.getBoundingClientRect().top;
+  const offsetPosition = elementPosition + window.scrollY - navBarOffset;
+
+  window.scrollTo({
+    top: offsetPosition,
+    behavior: "smooth",
+  });
 };
 
 function LanguageSwitch({ language, setLanguage, label }) {
