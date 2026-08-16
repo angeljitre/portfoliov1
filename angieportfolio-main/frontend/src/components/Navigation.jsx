@@ -9,12 +9,31 @@ const scrollTo = (id) => {
   if (!el) return;
 
   const navBarOffset = 80;
-  const elementPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
 
-  window.scrollTo({
-    top: elementPosition,
-    behavior: "smooth",
-  });
+  const move = () => {
+    const elementPosition = el.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.scrollY - navBarOffset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth",
+    });
+  };
+
+  move();
+
+  const tracker = setInterval(() => {
+    const currentDistance = Math.abs(el.getBoundingClientRect().top - navBarOffset);
+    if (currentDistance < 10) {
+      clearInterval(tracker);
+    } else {
+      move();
+    }
+  }, 150);
+
+  setTimeout(() => {
+    clearInterval(tracker);
+  }, 2500);
 };
 
   // 1. Ejecuta el movimiento inicial
