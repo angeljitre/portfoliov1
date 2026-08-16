@@ -3807,6 +3807,7 @@ html[data-theme="light"] .ambient-orb {
   }
 }
 
-.section-fixed {
+/* Solo aplica a las secciones que tienen ID (About, Works, Contact, etc.) */
+section[id] {
   min-height: 100vh;
 }
