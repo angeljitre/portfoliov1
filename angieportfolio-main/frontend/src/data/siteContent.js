@@ -545,12 +545,11 @@ export const siteContentBase = {
       {
         id: "navituxtla",
         title: "Navituxtla",
-        subtitle: "Architectural Videomapping",
         period: "2023",
         studio: "Jun Estudio",
         team: "18 people",
         description:
-          "A 3D animation project created for a videomapping presentation projected onto the front façade of San Marcos Cathedral in Tuxtla Gutiérrez during the December festivities.",
+          "A 2D and 3D animation project developed for a visual projection displayed onto the front façade of San Marcos Cathedral in Tuxtla Gutiérrez during the December festivities.",
         contribution:
           "I modeled environments, animated the scenes, and rendered the final visual pieces for the projection.",
         roles: ["3D Environment Modeling", "3D Animation", "Rendering"],
@@ -803,9 +802,8 @@ const spanishCopy = {
   "Website design": "Diseño del sitio web",
   "Promotional posters": "Carteles promocionales",
   "Campaign visuals shipped across web, social, and print.": "Recursos visuales de campaña desarrollados para web, redes y medios impresos.",
-  "Architectural Videomapping": "Videomapping arquitectónico",
   "18 people": "18 personas",
-  "A 3D animation project created for a videomapping presentation projected onto the front façade of San Marcos Cathedral in Tuxtla Gutiérrez during the December festivities.": "Proyecto de animación 3D realizado para una presentación de videomapping proyectada sobre la fachada principal de la Catedral de San Marcos en Tuxtla Gutiérrez durante las festividades decembrinas.",
+  "A 2D and 3D animation project developed for a visual projection displayed onto the front façade of San Marcos Cathedral in Tuxtla Gutiérrez during the December festivities.": "Un proyecto de animación 2D y 3D desarrollado para una proyección visual mostrada en la fachada principal de la Catedral de San Marcos en Tuxtla Gutiérrez durante las festividades decembrinas.",
   "I modeled environments, animated the scenes, and rendered the final visual pieces for the projection.": "Modelé entornos, animé las escenas y rendericé las piezas visuales finales para la proyección.",
   "3D Environment Modeling": "Modelado de entornos 3D",
   "3D Animation": "Animación 3D",
