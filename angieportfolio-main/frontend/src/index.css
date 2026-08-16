@@ -3807,7 +3807,6 @@ html[data-theme="light"] .ambient-orb {
   }
 }
 
-/* Reserva el espacio completo de la pantalla para evitar saltos */
-section {
+#about, #works, #contact, #collaborations {
   min-height: 100vh;
 }
