@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useLanguage } from "../hooks/useLanguage";
 import { getSoftwareLogo } from "../lib/logoAssets";
 import HalftoneDecor from "./HalftoneDecor";
@@ -90,11 +90,92 @@ function AnimationTest({ test, projectId }) {
           poster={test.poster}
           autoPlay
           loop
+          preload="metadata"
           className="h-full w-full"
           videoClassName="h-full w-full object-cover"
           controlLabel={ui.playPauseVideo || "Reproducir o pausar video"}
         />
         <div className="pointer-events-none absolute inset-0 halftone opacity-20 mix-blend-overlay" />
+      </div>
+    </motion.section>
+  );
+}
+
+// Hover-to-play pipeline card. The <video> element is only mounted after the
+// first hover (lazy) and gets paused + rewound on mouseleave so it always
+// settles back on the poster frame — kept deliberately dumb (no
+// IntersectionObserver, no polling) since play/pause is already gated by a
+// real user interaction.
+function PipelineCard({ item, index }) {
+  const [hovered, setHovered] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const videoRef = useRef(null);
+
+  const handleEnter = () => {
+    setHovered(true);
+    setLoaded(true);
+    videoRef.current?.play().catch(() => {});
+  };
+
+  const handleLeave = () => {
+    setHovered(false);
+    const video = videoRef.current;
+    if (!video) return;
+    video.pause();
+    video.currentTime = 0;
+  };
+
+  return (
+    <motion.div
+      {...cardReveal(index, { y: 24 })}
+      tabIndex={0}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      onFocus={handleEnter}
+      onBlur={handleLeave}
+      className="media-glass relative aspect-square overflow-hidden border border-white/10 transition-transform duration-500 ease-out hover:scale-105"
+    >
+      <img
+        src={item.poster}
+        alt={item.label}
+        loading="lazy"
+        decoding="async"
+        fetchPriority="low"
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${hovered ? "opacity-0" : "opacity-100"}`}
+      />
+      {loaded && (
+        <video
+          ref={videoRef}
+          src={item.src}
+          poster={item.poster}
+          muted
+          loop
+          playsInline
+          preload="none"
+          disablePictureInPicture
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${hovered ? "opacity-100" : "opacity-0"}`}
+        />
+      )}
+      <div className="pointer-events-none absolute inset-0 halftone opacity-15 mix-blend-overlay" />
+      <span className="media-label-chip bottom-2 left-2">{item.label}</span>
+    </motion.div>
+  );
+}
+
+function PipelineGrid({ pipeline, projectId }) {
+  return (
+    <motion.section
+      data-testid={`pipeline-grid-${projectId}`}
+      {...revealUp()}
+      className="mx-auto w-full max-w-5xl pb-14 pt-2 md:pb-16"
+    >
+      <span className="font-mono-label text-[10px] text-white/40">
+        / {pipeline.heading}
+      </span>
+      <div className="mt-4 grid grid-cols-3 gap-3 md:gap-4">
+        {pipeline.items.map((item, index) => (
+          <PipelineCard key={item.id} item={item} index={index} />
+        ))}
       </div>
     </motion.section>
   );
@@ -310,6 +391,9 @@ export default function Projects3D() {
           {projects3D.items.map((p, i) => (
             <div key={p.id}>
               <ProjectRow p={p} i={i} />
+              {p.pipeline && (
+                <PipelineGrid pipeline={p.pipeline} projectId={p.id} />
+              )}
               {p.animationTest && (
                 <AnimationTest test={p.animationTest} projectId={p.id} />
               )}
