@@ -4,11 +4,12 @@ import { Menu, X, Moon, Sun } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import { useTheme } from "../hooks/useTheme";
 
-const Navigation = () => {
-  const [active, setActive] = useState("");
-  const [toggle, setToggle] = useState(false);
+export default function Navigation({ ready }) {
+  const [open, setOpen] = useState(false);
+  const { content: siteContent, ui, language, setLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
 
-  // Función scrollTo limpia y correctamente cerrada
+  // La función scrollTo va aquí adentro:
   const scrollTo = (id) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -23,11 +24,9 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="w-full flex items-center py-5 fixed top-0 z-20 bg-primary">
-      {/* Aquí va todo tu menú, botones y enlaces */}
-    </nav>
+    // Tu código JSX del menú...
   );
-};
+}
 
 export default Navigation;
 
