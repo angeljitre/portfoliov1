@@ -1,5 +1,6 @@
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Maximize2 } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import { getSoftwareLogo } from "../lib/logoAssets";
 import HalftoneDecor from "./HalftoneDecor";
@@ -105,24 +106,52 @@ function AnimationTest({ test, projectId }) {
 // first hover (lazy) and gets paused + rewound on mouseleave so it always
 // settles back on the poster frame — kept deliberately dumb (no
 // IntersectionObserver, no polling) since play/pause is already gated by a
-// real user interaction.
-function PipelineCard({ item, index }) {
-  const [hovered, setHovered] = useState(false);
+// real user interaction. Width is driven entirely by the parent's flex
+// layout (`isHovered` sets this card's own flex-grow to 3, which shrinks
+// its two siblings back down to 1 automatically) — that's the accordion.
+function PipelineCard({ item, isHovered, onHover, index }) {
   const [loaded, setLoaded] = useState(false);
   const videoRef = useRef(null);
+  const pendingFullscreenRef = useRef(false);
 
   const handleEnter = () => {
-    setHovered(true);
+    onHover(true);
     setLoaded(true);
     videoRef.current?.play().catch(() => {});
   };
 
   const handleLeave = () => {
-    setHovered(false);
+    onHover(false);
     const video = videoRef.current;
     if (!video) return;
     video.pause();
     video.currentTime = 0;
+  };
+
+  // The fullscreen button can be the very first interaction (no prior
+  // hover), so the video may not be mounted yet. Flag the intent, mount it,
+  // then fire fullscreen once the ref is actually attached.
+  useEffect(() => {
+    if (!loaded || !pendingFullscreenRef.current) return;
+    pendingFullscreenRef.current = false;
+    const video = videoRef.current;
+    if (!video) return;
+    video.play().catch(() => {});
+    const request = video.requestFullscreen || video.webkitRequestFullscreen;
+    request?.call(video);
+  }, [loaded]);
+
+  const enterFullscreen = (event) => {
+    event.stopPropagation();
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {});
+      const request = video.requestFullscreen || video.webkitRequestFullscreen;
+      request?.call(video);
+    } else {
+      pendingFullscreenRef.current = true;
+      setLoaded(true);
+    }
   };
 
   return (
@@ -133,7 +162,8 @@ function PipelineCard({ item, index }) {
       onMouseLeave={handleLeave}
       onFocus={handleEnter}
       onBlur={handleLeave}
-      className="media-glass relative aspect-square overflow-hidden border border-white/10 transition-transform duration-500 ease-out hover:scale-105"
+      style={{ flex: isHovered ? "3 1 0%" : "1 1 0%" }}
+      className="media-glass relative h-48 overflow-hidden border border-white/10 transition-all duration-500 ease-out md:h-64"
     >
       <img
         src={item.poster}
@@ -141,7 +171,7 @@ function PipelineCard({ item, index }) {
         loading="lazy"
         decoding="async"
         fetchPriority="low"
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${hovered ? "opacity-0" : "opacity-100"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${isHovered ? "opacity-0" : "opacity-100"}`}
       />
       {loaded && (
         <video
@@ -153,16 +183,25 @@ function PipelineCard({ item, index }) {
           playsInline
           preload="none"
           disablePictureInPicture
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${hovered ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}
         />
       )}
       <div className="pointer-events-none absolute inset-0 halftone opacity-15 mix-blend-overlay" />
+      <button
+        type="button"
+        onClick={enterFullscreen}
+        aria-label="Fullscreen"
+        className={`absolute right-2 top-2 z-10 grid h-8 w-8 place-items-center rounded-md border border-white/20 bg-black/50 text-white/80 backdrop-blur transition-opacity duration-300 hover:border-white hover:text-white ${isHovered ? "opacity-100" : "opacity-0"}`}
+      >
+        <Maximize2 size={14} />
+      </button>
       <span className="media-label-chip bottom-2 left-2">{item.label}</span>
     </motion.div>
   );
 }
 
 function PipelineGrid({ pipeline, projectId }) {
+  const [hoveredIndex, setHoveredIndex] = useState(null);
   return (
     <motion.section
       data-testid={`pipeline-grid-${projectId}`}
@@ -172,9 +211,18 @@ function PipelineGrid({ pipeline, projectId }) {
       <span className="font-mono-label text-[10px] text-white/40">
         / {pipeline.heading}
       </span>
-      <div className="mt-4 grid grid-cols-3 gap-3 md:gap-4">
+      <h4 className="mt-2 font-heading text-[clamp(1.7rem,3.6vw,3rem)] font-black uppercase leading-[0.95] tracking-tight text-white">
+        {pipeline.heading}
+      </h4>
+      <div className="mt-5 flex flex-col gap-3 md:flex-row md:gap-4">
         {pipeline.items.map((item, index) => (
-          <PipelineCard key={item.id} item={item} index={index} />
+          <PipelineCard
+            key={item.id}
+            item={item}
+            index={index}
+            isHovered={hoveredIndex === index}
+            onHover={(value) => setHoveredIndex(value ? index : null)}
+          />
         ))}
       </div>
     </motion.section>

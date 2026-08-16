@@ -230,6 +230,7 @@ export const siteContentBase = {
             src: "/assets/3d/cartoon/turn.mp4",
             poster: "/assets/3d/cartoon/turn.jpg",
             label: "TURNAROUND",
+            cardScale: 1.15,
           },
           { type: "image", src: "/assets/3d/cartoon/cc1.jpg" },
           { type: "image", src: "/assets/3d/cartoon/cc2.jpg" },
