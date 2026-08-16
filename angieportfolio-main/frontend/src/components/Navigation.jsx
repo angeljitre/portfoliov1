@@ -4,55 +4,32 @@ import { Menu, X, Moon, Sun } from "lucide-react";
 import { useLanguage } from "../hooks/useLanguage";
 import { useTheme } from "../hooks/useTheme";
 
-const scrollTo = (id) => {
-  const el = document.getElementById(id);
-  if (!el) return;
+const Navigation = () => {
+  const [active, setActive] = useState("");
+  const [toggle, setToggle] = useState(false);
 
-  const navBarOffset = 80;
+  // Función scrollTo limpia y correctamente cerrada
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
 
-  const move = () => {
-    const elementPosition = el.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.scrollY - navBarOffset;
+    const navBarOffset = 80;
+    const elementPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
 
     window.scrollTo({
-      top: offsetPosition,
+      top: elementPosition,
       behavior: "smooth",
     });
   };
 
-  move();
-
-  const tracker = setInterval(() => {
-    const currentDistance = Math.abs(el.getBoundingClientRect().top - navBarOffset);
-    if (currentDistance < 10) {
-      clearInterval(tracker);
-    } else {
-      move();
-    }
-  }, 150);
-
-  setTimeout(() => {
-    clearInterval(tracker);
-  }, 2500);
+  return (
+    <nav className="w-full flex items-center py-5 fixed top-0 z-20 bg-primary">
+      {/* Aquí va todo tu menú, botones y enlaces */}
+    </nav>
+  );
 };
 
-  // 1. Ejecuta el movimiento inicial
-  move();
-
-  // 2. Rastrea la posición cada 150ms por si los componentes 3D cambian la altura mientras baja
-  const tracker = setInterval(() => {
-    const currentDistance = Math.abs(el.getBoundingClientRect().top - navBarOffset);
-    // Si ya llegó al objetivo (margen de 10px), detiene el rastreador
-    if (currentDistance < 10) {
-      clearInterval(tracker);
-    } else {
-      move();
-    }
-  }, 150);
-
-  // 3. Cancela el rastreador a los 2.5 segundos por seguridad
-  setTimeout(() => clearInterval(tracker), 2500);
-};
+export default Navigation;
 
 function LanguageSwitch({ language, setLanguage, label }) {
   return (
