@@ -8,13 +8,26 @@ const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
 
-  const navBarOffset = 80;
-  const elementPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
+  // Esta función calcula si realmente ya llegamos a la sección
+  const checkAndScroll = () => {
+    const rect = el.getBoundingClientRect();
+    
+    // Si la sección sigue estando muy lejos (porque la página se estiró de golpe),
+    // forzamos al navegador a seguir bajando suavemente.
+    if (rect.top > 100 || rect.top < -100) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
-  window.scrollTo({
-    top: elementPosition,
-    behavior: "smooth",
-  });
+  // 1. Damos el primer clic y arranca el viaje
+  checkAndScroll();
+
+  // 2. Monitores silenciosos: Si la página cambia de tamaño mientras vas bajando,
+  // estos "puntos de control" corrigen la ruta automáticamente para que llegues hasta abajo.
+  setTimeout(checkAndScroll, 400);
+  setTimeout(checkAndScroll, 800);
+  setTimeout(checkAndScroll, 1200);
+  setTimeout(checkAndScroll, 2000);
 };
 
 function LanguageSwitch({ language, setLanguage, label }) {
