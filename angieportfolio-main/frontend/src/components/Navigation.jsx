@@ -8,30 +8,34 @@ const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
 
-  const navBarOffset = 80; // Espacio para el menú superior
+  const navBarOffset = 80;
 
-  const startPosition = window.scrollY;
-  const targetPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
-  const distance = targetPosition - startPosition;
-  const duration = 700; // Duración del viaje en milisegundos
-  let startTime = null;
+  const move = () => {
+    const elementPosition = el.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.scrollY - navBarOffset;
 
-  // Animación manual cuadro por cuadro (Inmune a interrupciones de React)
-  const step = (currentTime) => {
-    if (!startTime) startTime = currentTime;
-    const progress = Math.min((currentTime - startTime) / duration, 1);
-
-    // Curva de velocidad suave (easeOutCubic)
-    const ease = 1 - Math.pow(1 - progress, 3);
-
-    window.scrollTo(0, startPosition + distance * ease);
-
-    if (progress < 1) {
-      requestAnimationFrame(step);
-    }
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth",
+    });
   };
 
-  requestAnimationFrame(step);
+  // 1. Ejecuta el movimiento inicial
+  move();
+
+  // 2. Rastrea la posición cada 150ms por si los componentes 3D cambian la altura mientras baja
+  const tracker = setInterval(() => {
+    const currentDistance = Math.abs(el.getBoundingClientRect().top - navBarOffset);
+    // Si ya llegó al objetivo (margen de 10px), detiene el rastreador
+    if (currentDistance < 10) {
+      clearInterval(tracker);
+    } else {
+      move();
+    }
+  }, 150);
+
+  // 3. Cancela el rastreador a los 2.5 segundos por seguridad
+  setTimeout(() => clearInterval(tracker), 2500);
 };
 
 function LanguageSwitch({ language, setLanguage, label }) {
