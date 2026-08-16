@@ -8,22 +8,25 @@ const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
 
-  // Esta función calcula si realmente ya llegamos a la sección
+  // 1. Si NO es contacto, usamos el scroll normal que funcionaba perfectamente
+  // (Asegúrate de que el id en tu código sea "contact", si está en español cámbialo a "contacto")
+  if (id !== "contact") {
+    el.scrollIntoView({ behavior: "smooth" });
+    return; // Detiene la función aquí para que no haga cosas raras
+  }
+
+  // 2. Lógica EXCLUSIVA para Contacto (para evitar que se quede a la mitad)
   const checkAndScroll = () => {
     const rect = el.getBoundingClientRect();
-    
-    // Si la sección sigue estando muy lejos (porque la página se estiró de golpe),
-    // forzamos al navegador a seguir bajando suavemente.
     if (rect.top > 100 || rect.top < -100) {
       el.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // 1. Damos el primer clic y arranca el viaje
+  // Arranca el viaje a Contacto
   checkAndScroll();
 
-  // 2. Monitores silenciosos: Si la página cambia de tamaño mientras vas bajando,
-  // estos "puntos de control" corrigen la ruta automáticamente para que llegues hasta abajo.
+  // Monitores silenciosos SOLO para Contacto
   setTimeout(checkAndScroll, 400);
   setTimeout(checkAndScroll, 800);
   setTimeout(checkAndScroll, 1200);

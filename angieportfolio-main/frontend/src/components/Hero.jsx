@@ -268,7 +268,13 @@ export default function Hero({ ready, onSplineLoad, onSplineError }) {
         <a href={socials.linkedin} target="_blank" rel="noreferrer noopener" aria-label="LinkedIn" className="hero-social-link">
           <Linkedin size={17} strokeWidth={2} />
         </a>
-        <a href={`mailto:${meta.email}`} aria-label={ui.emailDirect || "Enviar correo"} className="hero-social-link">
+        <a 
+    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${meta.email}&su=Contacto%20desde%20el%20portafolio`} 
+    target="_blank" 
+    rel="noreferrer noopener"
+    aria-label={ui.emailDirect || "Enviar correo"} 
+    className="hero-social-link"
+  >
           <Mail size={17} strokeWidth={2} />
         </a>
       </motion.aside>
