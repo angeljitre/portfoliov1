@@ -9,16 +9,13 @@ const scrollTo = (id) => {
   if (!el) return;
 
   const navBarOffset = 80;
+  const elementPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
 
-  const move = () => {
-    const elementPosition = el.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.scrollY - navBarOffset;
-
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: "smooth",
-    });
-  };
+  window.scrollTo({
+    top: elementPosition,
+    behavior: "smooth",
+  });
+};
 
   // 1. Ejecuta el movimiento inicial
   move();
