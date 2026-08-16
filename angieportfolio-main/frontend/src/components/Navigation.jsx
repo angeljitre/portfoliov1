@@ -8,17 +8,30 @@ const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
 
-  const navBarOffset = 80;
-  const elementPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
+  const navBarOffset = 80; // Espacio para el menú superior
 
-  // Si es contacto, salta inmediatamente sin dar tiempo a que React cancele la animación
-  if (id === "contact" || id === "contacto") {
-    window.scrollTo({ top: elementPosition, behavior: "auto" });
-    return;
-  }
+  const startPosition = window.scrollY;
+  const targetPosition = el.getBoundingClientRect().top + window.scrollY - navBarOffset;
+  const distance = targetPosition - startPosition;
+  const duration = 700; // Duración del viaje en milisegundos
+  let startTime = null;
 
-  // Para las demás secciones mantiene el scroll suave
-  window.scrollTo({ top: elementPosition, behavior: "smooth" });
+  // Animación manual cuadro por cuadro (Inmune a interrupciones de React)
+  const step = (currentTime) => {
+    if (!startTime) startTime = currentTime;
+    const progress = Math.min((currentTime - startTime) / duration, 1);
+
+    // Curva de velocidad suave (easeOutCubic)
+    const ease = 1 - Math.pow(1 - progress, 3);
+
+    window.scrollTo(0, startPosition + distance * ease);
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  };
+
+  requestAnimationFrame(step);
 };
 
 function LanguageSwitch({ language, setLanguage, label }) {
