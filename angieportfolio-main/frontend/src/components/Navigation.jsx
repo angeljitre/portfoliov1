@@ -8,24 +8,24 @@ const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
 
-  const navBarOffset = 80; // Altura en píxeles de tu menú superior para no tapar el título
-
-  const performScroll = () => {
-    const elementPosition = el.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.scrollY - navBarOffset;
-
+  // Si hacen clic en Contacto, va directo al fondo total de la página sin frenarse
+  if (id === "contact" || id === "contacto") {
     window.scrollTo({
-      top: offsetPosition,
+      top: document.documentElement.scrollHeight,
       behavior: "smooth",
     });
-  };
+    return;
+  }
 
-  // 1. Inicia el desplazamiento
-  performScroll();
+  // Para las demás secciones (Sobre mí, Trabajo, etc.):
+  const navBarOffset = 80;
+  const elementPosition = el.getBoundingClientRect().top;
+  const offsetPosition = elementPosition + window.scrollY - navBarOffset;
 
-  // 2. Reajusta la posición mientras baja (por si los canvas 3D cambian la altura de la página en el camino)
-  setTimeout(performScroll, 350);
-  setTimeout(performScroll, 700);
+  window.scrollTo({
+    top: offsetPosition,
+    behavior: "smooth",
+  });
 };
 
 function LanguageSwitch({ language, setLanguage, label }) {
