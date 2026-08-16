@@ -8,15 +8,24 @@ const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
 
-  // 80 es la altura en píxeles de tu barra de navegación fija para que no tape el título
-  const navBarOffset = 80; 
-  const elementPosition = el.getBoundingClientRect().top;
-  const offsetPosition = elementPosition + window.scrollY - navBarOffset;
+  const navBarOffset = 80; // Altura en píxeles de tu menú superior para no tapar el título
 
-  window.scrollTo({
-    top: offsetPosition,
-    behavior: "smooth",
-  });
+  const performScroll = () => {
+    const elementPosition = el.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.scrollY - navBarOffset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth",
+    });
+  };
+
+  // 1. Inicia el desplazamiento
+  performScroll();
+
+  // 2. Reajusta la posición mientras baja (por si los canvas 3D cambian la altura de la página en el camino)
+  setTimeout(performScroll, 350);
+  setTimeout(performScroll, 700);
 };
 
 function LanguageSwitch({ language, setLanguage, label }) {
