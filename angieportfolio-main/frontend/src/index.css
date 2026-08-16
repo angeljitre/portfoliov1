@@ -3807,7 +3807,6 @@ html[data-theme="light"] .ambient-orb {
   }
 }
 
-/* Aplica la altura a todas las secciones EXCEPTO a la primera (Hero/Inicio) */
-section:not(:first-of-type) {
+.section-fixed {
   min-height: 100vh;
 }
